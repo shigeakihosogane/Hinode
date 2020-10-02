@@ -22,39 +22,45 @@ Partial Class Form1
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
-        Me.TextBox2 = New System.Windows.Forms.TextBox()
-        Me.TextBox3 = New System.Windows.Forms.TextBox()
+        Me.txt転送元 = New System.Windows.Forms.TextBox()
+        Me.txt監視 = New System.Windows.Forms.TextBox()
+        Me.txt転送先 = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
+        Me.btn参照1 = New System.Windows.Forms.Button()
+        Me.btn参照2 = New System.Windows.Forms.Button()
+        Me.btn参照3 = New System.Windows.Forms.Button()
+        Me.btn設定保存 = New System.Windows.Forms.Button()
+        Me.lblステータス = New System.Windows.Forms.Label()
+        Me.btn1 = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
-        'TextBox1
+        'txt転送元
         '
-        Me.TextBox1.Location = New System.Drawing.Point(197, 141)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(464, 19)
-        Me.TextBox1.TabIndex = 0
+        Me.txt転送元.Location = New System.Drawing.Point(197, 215)
+        Me.txt転送元.Name = "txt転送元"
+        Me.txt転送元.Size = New System.Drawing.Size(464, 19)
+        Me.txt転送元.TabIndex = 0
         '
-        'TextBox2
+        'txt監視
         '
-        Me.TextBox2.Location = New System.Drawing.Point(197, 218)
-        Me.TextBox2.Name = "TextBox2"
-        Me.TextBox2.Size = New System.Drawing.Size(464, 19)
-        Me.TextBox2.TabIndex = 1
+        Me.txt監視.Location = New System.Drawing.Point(197, 282)
+        Me.txt監視.Name = "txt監視"
+        Me.txt監視.Size = New System.Drawing.Size(464, 19)
+        Me.txt監視.TabIndex = 1
         '
-        'TextBox3
+        'txt転送先
         '
-        Me.TextBox3.Location = New System.Drawing.Point(197, 282)
-        Me.TextBox3.Name = "TextBox3"
-        Me.TextBox3.Size = New System.Drawing.Size(464, 19)
-        Me.TextBox3.TabIndex = 2
+        Me.txt転送先.Location = New System.Drawing.Point(197, 339)
+        Me.txt転送先.Name = "txt転送先"
+        Me.txt転送先.Size = New System.Drawing.Size(464, 19)
+        Me.txt転送先.TabIndex = 2
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(59, 144)
+        Me.Label1.Location = New System.Drawing.Point(59, 218)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(76, 12)
         Me.Label1.TabIndex = 3
@@ -63,7 +69,7 @@ Partial Class Form1
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(59, 221)
+        Me.Label2.Location = New System.Drawing.Point(59, 285)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(64, 12)
         Me.Label2.TabIndex = 4
@@ -72,23 +78,85 @@ Partial Class Form1
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(59, 285)
+        Me.Label3.Location = New System.Drawing.Point(59, 342)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(76, 12)
         Me.Label3.TabIndex = 5
         Me.Label3.Text = "転送先フォルダ"
+        '
+        'btn参照1
+        '
+        Me.btn参照1.Location = New System.Drawing.Point(683, 213)
+        Me.btn参照1.Name = "btn参照1"
+        Me.btn参照1.Size = New System.Drawing.Size(75, 23)
+        Me.btn参照1.TabIndex = 6
+        Me.btn参照1.Text = "参照"
+        Me.btn参照1.UseVisualStyleBackColor = True
+        '
+        'btn参照2
+        '
+        Me.btn参照2.Location = New System.Drawing.Point(683, 280)
+        Me.btn参照2.Name = "btn参照2"
+        Me.btn参照2.Size = New System.Drawing.Size(75, 23)
+        Me.btn参照2.TabIndex = 7
+        Me.btn参照2.Text = "参照"
+        Me.btn参照2.UseVisualStyleBackColor = True
+        '
+        'btn参照3
+        '
+        Me.btn参照3.Location = New System.Drawing.Point(683, 337)
+        Me.btn参照3.Name = "btn参照3"
+        Me.btn参照3.Size = New System.Drawing.Size(75, 23)
+        Me.btn参照3.TabIndex = 8
+        Me.btn参照3.Text = "参照"
+        Me.btn参照3.UseVisualStyleBackColor = True
+        '
+        'btn設定保存
+        '
+        Me.btn設定保存.Location = New System.Drawing.Point(683, 403)
+        Me.btn設定保存.Name = "btn設定保存"
+        Me.btn設定保存.Size = New System.Drawing.Size(75, 23)
+        Me.btn設定保存.TabIndex = 9
+        Me.btn設定保存.Text = "設定を保存"
+        Me.btn設定保存.UseVisualStyleBackColor = True
+        '
+        'lblステータス
+        '
+        Me.lblステータス.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblステータス.AutoSize = True
+        Me.lblステータス.Font = New System.Drawing.Font("MS UI Gothic", 72.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.lblステータス.Location = New System.Drawing.Point(250, 44)
+        Me.lblステータス.Name = "lblステータス"
+        Me.lblステータス.Size = New System.Drawing.Size(0, 97)
+        Me.lblステータス.TabIndex = 10
+        '
+        'btn1
+        '
+        Me.btn1.Location = New System.Drawing.Point(683, 118)
+        Me.btn1.Name = "btn1"
+        Me.btn1.Size = New System.Drawing.Size(75, 23)
+        Me.btn1.TabIndex = 11
+        Me.btn1.Text = "Button1"
+        Me.btn1.UseVisualStyleBackColor = True
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
+        Me.Controls.Add(Me.btn1)
+        Me.Controls.Add(Me.lblステータス)
+        Me.Controls.Add(Me.btn設定保存)
+        Me.Controls.Add(Me.btn参照3)
+        Me.Controls.Add(Me.btn参照2)
+        Me.Controls.Add(Me.btn参照1)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.TextBox3)
-        Me.Controls.Add(Me.TextBox2)
-        Me.Controls.Add(Me.TextBox1)
+        Me.Controls.Add(Me.txt転送先)
+        Me.Controls.Add(Me.txt監視)
+        Me.Controls.Add(Me.txt転送元)
         Me.Name = "Form1"
         Me.Text = "Form1"
         Me.ResumeLayout(False)
@@ -96,10 +164,16 @@ Partial Class Form1
 
     End Sub
 
-    Friend WithEvents TextBox1 As TextBox
-    Friend WithEvents TextBox2 As TextBox
-    Friend WithEvents TextBox3 As TextBox
+    Friend WithEvents txt転送元 As TextBox
+    Friend WithEvents txt監視 As TextBox
+    Friend WithEvents txt転送先 As TextBox
     Friend WithEvents Label1 As Label
     Friend WithEvents Label2 As Label
     Friend WithEvents Label3 As Label
+    Friend WithEvents btn参照1 As Button
+    Friend WithEvents btn参照2 As Button
+    Friend WithEvents btn参照3 As Button
+    Friend WithEvents btn設定保存 As Button
+    Friend WithEvents lblステータス As Label
+    Friend WithEvents btn1 As Button
 End Class
