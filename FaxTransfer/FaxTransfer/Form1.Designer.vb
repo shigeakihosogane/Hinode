@@ -140,6 +140,7 @@ Partial Class Form1
         Me.btnテスト.TabIndex = 12
         Me.btnテスト.Text = "テスト"
         Me.btnテスト.UseVisualStyleBackColor = True
+        Me.btnテスト.Visible = False
         '
         'Form1
         '
@@ -159,7 +160,7 @@ Partial Class Form1
         Me.Controls.Add(Me.txt監視)
         Me.Controls.Add(Me.txt転送元)
         Me.Name = "Form1"
-        Me.Text = "Form1"
+        Me.Text = "FaxTransfer"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
