@@ -230,9 +230,9 @@ Public Class Form1
             End If
             fname = fname & ".pdf"
 
-            System.IO.File.Move(e.FullPath, tennsoumoto & "\" & fname & ".pdf")
-            'System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname & ".pdf", False)
-            'System.IO.File.Delete(e.FullPath)
+            'System.IO.File.Move(e.FullPath, tennsoumoto & "\" & fname & ".pdf")
+            System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname & ".pdf", False)
+            System.IO.File.Delete(e.FullPath)
 
         End If
 
