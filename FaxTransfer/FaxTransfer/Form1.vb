@@ -36,6 +36,9 @@ Public Class Form1
             If txt転送元.Text <> "" And txt監視.Text <> "" And txt転送先.Text <> "" Then
                 lblステータス.Text = "稼働中"
                 btn1.Text = "停止"
+                txt転送元.ReadOnly = True
+                txt監視.ReadOnly = True
+                txt転送先.ReadOnly = True
                 転送開始()
                 '監視開始()
             Else
@@ -44,6 +47,9 @@ Public Class Form1
         Else
             lblステータス.Text = "停止中"
             btn1.Text = "開始"
+            txt転送元.ReadOnly = False
+            txt監視.ReadOnly = False
+            txt転送先.ReadOnly = False
             転送停止()
             '監視停止()
         End If
@@ -240,38 +246,50 @@ Public Class Form1
 
 
     Private Sub btn参照1_Click(sender As Object, e As EventArgs) Handles btn参照1.Click
-        Dim fbd As New FolderBrowserDialog
-        fbd.Description = "フォルダを指定してください。"
-        fbd.RootFolder = Environment.SpecialFolder.Desktop
-        fbd.SelectedPath = "C:\Windows"
-        fbd.ShowNewFolderButton = True
+        If lblステータス.Text = "稼働中" Then
+            MsgBox("稼働中はフォルダを変更できません")
+        Else
+            Dim fbd As New FolderBrowserDialog
+            fbd.Description = "フォルダを指定してください。"
+            fbd.RootFolder = Environment.SpecialFolder.Desktop
+            fbd.SelectedPath = "C:\Windows"
+            fbd.ShowNewFolderButton = True
 
-        If fbd.ShowDialog(Me) = DialogResult.OK Then
-            txt転送元.Text = fbd.SelectedPath
+            If fbd.ShowDialog(Me) = DialogResult.OK Then
+                txt転送元.Text = fbd.SelectedPath
+            End If
         End If
     End Sub
 
     Private Sub btn参照2_Click(sender As Object, e As EventArgs) Handles btn参照2.Click
-        Dim fbd As New FolderBrowserDialog
-        fbd.Description = "フォルダを指定してください。"
-        fbd.RootFolder = Environment.SpecialFolder.Desktop
-        fbd.SelectedPath = "C:\Windows"
-        fbd.ShowNewFolderButton = True
+        If lblステータス.Text = "稼働中" Then
+            MsgBox("稼働中はフォルダを変更できません")
+        Else
+            Dim fbd As New FolderBrowserDialog
+            fbd.Description = "フォルダを指定してください。"
+            fbd.RootFolder = Environment.SpecialFolder.Desktop
+            fbd.SelectedPath = "C:\Windows"
+            fbd.ShowNewFolderButton = True
 
-        If fbd.ShowDialog(Me) = DialogResult.OK Then
-            txt監視.Text = fbd.SelectedPath
+            If fbd.ShowDialog(Me) = DialogResult.OK Then
+                txt監視.Text = fbd.SelectedPath
+            End If
         End If
     End Sub
 
     Private Sub btn参照3_Click(sender As Object, e As EventArgs) Handles btn参照3.Click
-        Dim fbd As New FolderBrowserDialog
-        fbd.Description = "フォルダを指定してください。"
-        fbd.RootFolder = Environment.SpecialFolder.Desktop
-        fbd.SelectedPath = "C:\Windows"
-        fbd.ShowNewFolderButton = True
+        If lblステータス.Text = "稼働中" Then
+            MsgBox("稼働中はフォルダを変更できません")
+        Else
+            Dim fbd As New FolderBrowserDialog
+            fbd.Description = "フォルダを指定してください。"
+            fbd.RootFolder = Environment.SpecialFolder.Desktop
+            fbd.SelectedPath = "C:\Windows"
+            fbd.ShowNewFolderButton = True
 
-        If fbd.ShowDialog(Me) = DialogResult.OK Then
-            txt転送先.Text = fbd.SelectedPath
+            If fbd.ShowDialog(Me) = DialogResult.OK Then
+                txt転送先.Text = fbd.SelectedPath
+            End If
         End If
     End Sub
 
