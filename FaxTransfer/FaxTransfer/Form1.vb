@@ -5,7 +5,7 @@ Imports System.Runtime.Serialization
 Imports System.Runtime.Serialization.Formatters.Binary
 Imports System.Windows.Forms
 Imports Microsoft.Win32
-
+Imports System.Threading
 
 Public Class Form1
 
@@ -109,6 +109,7 @@ Public Class Form1
         Select Case e.ChangeType
             Case System.IO.WatcherChangeTypes.Changed
                 Console.WriteLine(("ファイル 「" + e.FullPath + "」が変更されました。"))
+                MsgBox(e.FullPath)
             Case System.IO.WatcherChangeTypes.Deleted
                 Console.WriteLine(("ファイル 「" + e.FullPath + "」が削除されました。"))
             Case System.IO.WatcherChangeTypes.Created
@@ -119,7 +120,7 @@ Public Class Form1
     End Sub
     Private Sub watcher_Renamed(ByVal source As System.Object, ByVal e As System.IO.RenamedEventArgs)
 
-        Console.WriteLine(("ファイル 「" + e.FullPath + "」の名前が変更されました。"))
+        'Console.WriteLine(("ファイル 「" + e.FullPath + "」の名前が変更されました。"))
 
         Dim fname As String = Path.GetFileNameWithoutExtension(e.FullPath)
         fname = Replace(fname, Space(1), String.Empty)
@@ -186,7 +187,8 @@ Public Class Form1
                 cn.Dispose()
 
                 Try
-                    System.IO.File.Copy(e.FullPath, tennsousaki & "\" & fname & ".pdf", True)
+                    System.Threading.Thread.Sleep(500) '-----IWDTのエラー回避、もうちょっと工夫した方がいいかも・・・
+                    System.IO.File.Copy(e.FullPath, tennsousaki & "\" & fname, True)
                     'Console.WriteLine(fname)
                 Catch ex As System.IO.FileNotFoundException 'コピーするにファイルがない場合
                     flg = False
@@ -234,12 +236,13 @@ Public Class Form1
             End If
             fname = fname & ".pdf"
 
+            System.Threading.Thread.Sleep(500) '-----IWDTのエラー回避、もうちょっと工夫した方がいいかも・・・
             System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname & ".pdf", False)
 
         End If
 
 
-        'System.IO.File.Delete(e.FullPath)
+        System.IO.File.Delete(e.FullPath)
 
 
     End Sub
