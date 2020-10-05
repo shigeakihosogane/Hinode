@@ -34,6 +34,8 @@ Partial Class Form1
         Me.lblステータス = New System.Windows.Forms.Label()
         Me.btn1 = New System.Windows.Forms.Button()
         Me.btnテスト = New System.Windows.Forms.Button()
+        Me.EventLog1 = New System.Diagnostics.EventLog()
+        CType(Me.EventLog1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'txt転送元
@@ -142,6 +144,10 @@ Partial Class Form1
         Me.btnテスト.UseVisualStyleBackColor = True
         Me.btnテスト.Visible = False
         '
+        'EventLog1
+        '
+        Me.EventLog1.SynchronizingObject = Me
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
@@ -161,6 +167,7 @@ Partial Class Form1
         Me.Controls.Add(Me.txt転送元)
         Me.Name = "Form1"
         Me.Text = "FaxTransfer"
+        CType(Me.EventLog1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -178,4 +185,5 @@ Partial Class Form1
     Friend WithEvents lblステータス As Label
     Friend WithEvents btn1 As Button
     Friend WithEvents btnテスト As Button
+    Friend WithEvents EventLog1 As EventLog
 End Class

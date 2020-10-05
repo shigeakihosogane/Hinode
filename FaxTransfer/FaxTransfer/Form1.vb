@@ -26,7 +26,12 @@ Public Class Form1
     End Sub
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
 
-        SettingClass.設定保存()
+        If lblステータス.Text = "稼働中" Then
+            MsgBox("稼働中は閉じることができません！")
+            e.Cancel = True
+        Else
+            SettingClass.設定保存()
+        End If
 
     End Sub
 
@@ -45,13 +50,28 @@ Public Class Form1
                 MsgBox("フォルダを選択してください。")
             End If
         Else
-            lblステータス.Text = "停止中"
-            btn1.Text = "開始"
-            txt転送元.ReadOnly = False
-            txt監視.ReadOnly = False
-            txt転送先.ReadOnly = False
-            転送停止()
-            '監視停止()
+            Dim result As DialogResult = MessageBox.Show("FAX転送を停止しますか？", "確認メッセージ",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Exclamation,
+                MessageBoxDefaultButton.Button2)
+            If result = DialogResult.OK Then
+                Dim inputText As String
+                inputText = InputBox("パスワードを入力してください。", "確認メッセージ", "", 200, 100)
+                If inputText = "Hinode8739" Then
+                    lblステータス.Text = "停止中"
+                    btn1.Text = "開始"
+                    txt転送元.ReadOnly = False
+                    txt監視.ReadOnly = False
+                    txt転送先.ReadOnly = False
+                    転送停止()
+                    '監視停止()
+                    MsgBox("転送を停止しました。")
+                Else
+                    MsgBox("パスワードが違います！")
+                End If
+
+            End If
+
         End If
 
     End Sub
