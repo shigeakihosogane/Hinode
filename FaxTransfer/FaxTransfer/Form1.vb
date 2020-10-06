@@ -45,7 +45,6 @@ Public Class Form1
                 txt監視.ReadOnly = True
                 txt転送先.ReadOnly = True
                 転送開始()
-                '監視開始()
             Else
                 MsgBox("フォルダを選択してください。")
             End If
@@ -64,7 +63,6 @@ Public Class Form1
                     txt監視.ReadOnly = False
                     txt転送先.ReadOnly = False
                     転送停止()
-                    '監視停止()
                     MsgBox("転送を停止しました。")
                 Else
                     MsgBox("パスワードが違います！")
@@ -129,12 +127,10 @@ Public Class Form1
         Select Case e.ChangeType
             Case System.IO.WatcherChangeTypes.Changed
                 Console.WriteLine(("ファイル 「" + e.FullPath + "」が変更されました。"))
-                MsgBox(e.FullPath)
             Case System.IO.WatcherChangeTypes.Deleted
                 Console.WriteLine(("ファイル 「" + e.FullPath + "」が削除されました。"))
             Case System.IO.WatcherChangeTypes.Created
                 Console.WriteLine(("ファイル 「" + e.FullPath + "」が作成されました。"))
-
         End Select
 
     End Sub
@@ -257,7 +253,7 @@ Public Class Form1
             fname = fname & ".pdf"
 
             System.Threading.Thread.Sleep(500) '-----IWDTのエラー回避、もうちょっと工夫した方がいいかも・・・
-            System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname & ".pdf", False)
+            System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
 
         End If
 
@@ -266,7 +262,6 @@ Public Class Form1
 
 
     End Sub
-
 
     Private Sub btn参照1_Click(sender As Object, e As EventArgs) Handles btn参照1.Click
         If lblステータス.Text = "稼働中" Then
@@ -316,74 +311,12 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub 監視開始()
-
-
-        Dim watcher As New System.IO.FileSystemWatcher
-        '監視するディレクトリを指定
-        watcher.Path = txt監視.Text
-        '*.txtファイルを監視、すべて監視するときは""にする
-        watcher.Filter = ""
-        'ファイル名とディレクトリ名と最終書き込む日時の変更を監視
-        watcher.NotifyFilter = System.IO.NotifyFilters.FileName
-        'サブディレクトリは監視しない
-        watcher.IncludeSubdirectories = False
-        '必要に応じてバッファサイズを変更
-        'watcher.InternalBufferSize = 4096
-        '同期的に監視を開始する
-        Dim changedResult As System.IO.WaitForChangedResult = watcher.WaitForChanged(System.IO.WatcherChangeTypes.Renamed)
-
-        MsgBox(changedResult.Name)
-
-        Console.WriteLine(changedResult.Name)
-
-
-
-        '===========================================================================================================================================
-
-
-        If changedResult.TimedOut Then
-            Console.WriteLine("タイムアウトしました。")
-            Return
-        End If
-
-        '変更があったときに結果を表示する
-        Select Case changedResult.ChangeType
-            Case System.IO.WatcherChangeTypes.Renamed
-                Console.WriteLine(("ファイル 「" +
-                    changedResult.OldName + "」の名前が「" +
-                    changedResult.Name + "」に変更されました。"))
-            Case System.IO.WatcherChangeTypes.Changed
-                Console.WriteLine(("ファイル 「" +
-                    changedResult.Name + "」が変更されました。"))
-            Case System.IO.WatcherChangeTypes.Created
-                Console.WriteLine(("ファイル 「" +
-                    changedResult.Name + "」が作成されました。"))
-            Case System.IO.WatcherChangeTypes.Deleted
-                Console.WriteLine(("ファイル 「" +
-                    changedResult.Name + "」が削除されました。"))
-
-        End Select
-
-    End Sub
-
-    Private Sub 監視停止()
-
-        'watcher.EnableRaisingEvents = False
-        'watcher.Dispose()
-        'watcher = Nothing
-
-    End Sub
-
-
-
     Private Sub btnテスト_Click(sender As Object, e As EventArgs) Handles btnテスト.Click
 
 
 
 
     End Sub
-
 
 End Class
 

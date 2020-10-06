@@ -22,6 +22,7 @@ Partial Class Form1
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.txt転送元 = New System.Windows.Forms.TextBox()
         Me.txt監視 = New System.Windows.Forms.TextBox()
         Me.txt転送先 = New System.Windows.Forms.TextBox()
@@ -165,6 +166,7 @@ Partial Class Form1
         Me.Controls.Add(Me.txt転送先)
         Me.Controls.Add(Me.txt監視)
         Me.Controls.Add(Me.txt転送元)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Form1"
         Me.Text = "FaxTransfer"
         CType(Me.EventLog1, System.ComponentModel.ISupportInitialize).EndInit()
