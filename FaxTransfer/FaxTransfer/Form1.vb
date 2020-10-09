@@ -9,11 +9,15 @@ Imports System.Threading
 
 Public Class Form1
 
+    Dim cnstr As String = "Data Source=SV201710;Initial Catalog=HINODEDB;USER ID=sa;PASSWORD=cube%6614;"
+
     Private watcher As System.IO.FileSystemWatcher = Nothing
+    Private swatcher As System.IO.FileSystemWatcher = Nothing
 
     Dim tennsoumoto As String
     Dim kannsi As String
     Dim tennsousaki As String
+    Dim scan As String
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -38,13 +42,16 @@ Public Class Form1
     Private Sub btn1_Click(sender As Object, e As EventArgs) Handles btn1.Click
 
         If lblステータス.Text = "停止中" Then
-            If txt転送元.Text <> "" And txt監視.Text <> "" And txt転送先.Text <> "" Then
+            If txt転送元.Text <> "" And txt監視.Text <> "" And txt転送先.Text <> "" And txtscan.Text <> "" Then
                 lblステータス.Text = "稼働中"
                 btn1.Text = "停止"
                 txt転送元.ReadOnly = True
                 txt監視.ReadOnly = True
                 txt転送先.ReadOnly = True
-                転送開始()
+                txtscan.ReadOnly = True
+                Therefore転送開始()
+                scan転送開始()
+                MsgBox("転送を開始しました。")
             Else
                 MsgBox("フォルダを選択してください。")
             End If
@@ -55,14 +62,16 @@ Public Class Form1
                 MessageBoxDefaultButton.Button2)
             If result = DialogResult.OK Then
                 Dim inputText As String
-                inputText = InputBox("パスワードを入力してください。", "確認メッセージ", "", 200, 100)
+                inputText = InputBox("パスワードを入力してください。", "確認メッセージ", "", Me.Left + 300, Me.Top + 200)
                 If inputText = "Hinode8739" Then
                     lblステータス.Text = "停止中"
                     btn1.Text = "開始"
                     txt転送元.ReadOnly = False
                     txt監視.ReadOnly = False
                     txt転送先.ReadOnly = False
-                    転送停止()
+                    txtscan.ReadOnly = False
+                    Therefore転送停止()
+                    scan転送停止()
                     MsgBox("転送を停止しました。")
                 Else
                     MsgBox("パスワードが違います！")
@@ -74,7 +83,7 @@ Public Class Form1
 
     End Sub
 
-    Public Sub 転送開始()
+    Public Sub Therefore転送開始()
 
         If Not (watcher Is Nothing) Then
             Return
@@ -107,18 +116,18 @@ Public Class Form1
 
         '監視を開始する
         watcher.EnableRaisingEvents = True
-        Console.WriteLine("監視を開始しました。")
+        Console.WriteLine("Therefor転送を開始しました。")
 
 
     End Sub
 
-    Public Sub 転送停止()
+    Public Sub Therefore転送停止()
 
         '監視を終了
         watcher.EnableRaisingEvents = False
         watcher.Dispose()
         watcher = Nothing
-        Console.WriteLine("監視を終了しました。")
+        Console.WriteLine("Therefor転送を終了しました。")
 
     End Sub
 
@@ -149,18 +158,24 @@ Public Class Form1
 
             Dim zyutyuuCD As Decimal = CDec(fnarray(0))
 
-            Dim cnstr As String = "Data Source=SV201710;Initial Catalog=HINODEDB;USER ID=sa;PASSWORD=cube%6614;"
-            Dim sqlstr As String = "SELECT 開始日, 終了日, 担当部署, 備考 FROM T_TF_D_index WHERE 受注ID = " & zyutyuuCD
+            Dim sqlstr As String = "SELECT dbo.T_TF_D_Index.受注ID, dbo.T_TF_D_Index.開始日, dbo.T_TF_D_Index.終了日, dbo.T_TF_D_Index.担当部署, dbo.T_TF_D_Index.備考, dbo.T_TF_D_Index.荷主ID, dbo.T_TF_M_NinusiInfo.名称_HND, dbo.T_TF_M_NinusiInfo.名称_TF, dbo.T_TF_M_NinusiInfo.FAX番号 "
+            sqlstr &= "FROM dbo.T_TF_D_Index LEFT OUTER JOIN dbo.T_TF_M_NinusiInfo ON dbo.T_TF_D_Index.荷主ID = dbo.T_TF_M_NinusiInfo.荷主ID "
+            sqlstr &= "WHERE (dbo.T_TF_D_Index.受注ID = " & zyutyuuCD & ")"
 
 
             Dim cn As SqlClient.SqlConnection
             Dim cmd As SqlClient.SqlCommand
             Dim reader As SqlClient.SqlDataReader
 
-            Dim sdate As Date
-            Dim edate As Date
+            Dim sdate As String = ""
+            Dim edate As String = ""
             Dim busyo As String = ""
             Dim bikou As String = ""
+            Dim ninusiID As Integer = 0
+            Dim ninusimeiHND As String = ""
+            Dim ninusimeiTF As String = ""
+            Dim FAXbanngou As String = ""
+
 
             cn = New SqlClient.SqlConnection(cnstr)
 
@@ -175,38 +190,116 @@ Public Class Form1
             If reader.HasRows = True Then '---レコードあり
 
                 Do While reader.Read()
-                    sdate = reader("開始日")
-                    edate = reader("終了日")
+                    If reader("開始日") IsNot DBNull.Value Then
+                        sdate = Format(reader("開始日"), "yyyymmdd")
+                    End If
+                    If reader("終了日") IsNot DBNull.Value Then
+                        edate = Format(reader("終了日"), "yyyymmdd")
+                    End If
                     busyo = reader("担当部署")
                     bikou = reader("備考")
+                    ninusiID = reader("荷主ID")
+                    ninusimeiHND = reader("名称_HND")
+                    ninusimeiTF = reader("名称_TF")
+                    FAXbanngou = reader("FAX番号")
                 Loop
-
-                fname = fnarray(1)
-                fname = fname & "_" & fnarray(2)
-                fname = fname & "_" & fnarray(3)
-                fname = fname & "_" & fnarray(0)
-                fname = fname & "_" & Format(sdate, "yyyymmdd")
-                fname = fname & "_" & Format(edate, "yyyymmdd")
-                fname = fname & "_" & busyo
-                fname = fname & "_" & bikou
-                If fnarray.Length = 4 Then
-                    fname = fname & "_1"
-                Else
-                    fname = fname & "_" & fnarray(4)
-                End If
-                fname = fname & ".pdf"
-
 
                 reader.Close()
                 cmd.Dispose()
                 cn.Close()
                 cn.Dispose()
 
-                Try
-                    System.Threading.Thread.Sleep(500) '-----IWDTのエラー回避、もうちょっと工夫した方がいいかも・・・
-                    System.IO.File.Copy(e.FullPath, tennsousaki & "\" & fname, True)
-                    'Console.WriteLine(fname)
-                Catch ex As System.IO.FileNotFoundException 'コピーするにファイルがない場合
+                '####################################################################ここからファイル名組み立て
+
+                If zyutyuuCD < 1000 Then '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&受注以外の処理（受注CD三桁以下）
+
+                    If fnarray(2) = "登録名称不明" Or fnarray(2) = "scan" Or fnarray(2) = "" Then '荷主名
+                        If ninusimeiTF = "" Then
+                            fname = ninusimeiHND
+                        Else
+                            fname = ninusimeiTF
+                        End If
+                    Else
+                        fname = fnarray(2)
+                    End If
+
+                    If fnarray(3) = "" Then '---------------------------------------FAX番号
+                        If FAXbanngou = "" Then
+                            fname &= "_" & ""
+                        Else
+                            fname &= "_" & FAXbanngou
+                        End If
+                    Else
+                        fname &= "_" & fnarray(3)
+                    End If
+
+                    fname &= "_" & fnarray(4) '-------------------------------------タイムスタンプ
+                    fname &= "_" & fnarray(0) '-------------------------------------受注CD
+                    fname &= "_" & sdate '------------------------------------------開始日
+                    fname &= "_" & edate '------------------------------------------終了日
+                    fname &= "_" & busyo '------------------------------------------担当部署
+                    fname &= "_" & fnarray(1) '-------------------------------------備考
+                    If fnarray.Length = 5 Then '------------------------------------ページ
+                        fname &= "_1"
+                    Else
+                        fname &= "_" & fnarray(5)
+                    End If
+                    fname &= ".pdf" '-----------------------------------------------拡張子
+
+
+                Else '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&受注の処理
+
+                    If fnarray(1) = "登録名称不明" Or fnarray(1) = "scan" Or fnarray(1) = "" Then '荷主名
+                        If ninusimeiTF = "" Then
+                            fname = ninusimeiHND
+                        Else
+                            fname = ninusimeiTF
+                        End If
+                    Else
+                        fname = fnarray(1)
+                        If ninusimeiTF = "" Then
+                            荷主名保存(ninusiID, fnarray(1))
+                        End If
+                    End If
+
+                    If fnarray(2) = "" Then '---------------------------------------FAX番号
+                        If FAXbanngou = "" Then
+                            fname &= "_" & ""
+                        Else
+                            fname &= "_" & FAXbanngou
+                        End If
+                    Else
+                        fname &= "_" & fnarray(2)
+                        If FAXbanngou = "" Then
+                            FAX番号保存(ninusiID, fnarray(2))
+                        End If
+                    End If
+
+                    fname &= "_" & fnarray(3) '-------------------------------------タイムスタンプ
+                    fname &= "_" & fnarray(0) '-------------------------------------受注CD
+                    fname &= "_" & sdate '------------------------------------------開始日
+                    fname &= "_" & edate '------------------------------------------終了日
+                    fname &= "_" & busyo '------------------------------------------担当部署
+                    fname &= "_" & bikou '------------------------------------------備考
+                    If fnarray.Length = 4 Then '------------------------------------ページ
+                        fname &= "_1"
+                    Else
+                        fname &= "_" & fnarray(4)
+                    End If
+                    fname &= ".pdf" '-----------------------------------------------拡張子
+
+                End If
+                '###################################################################ファイル名組み立て終了
+
+
+                Try '-----ファイルのコピー処理
+                    If FileOpenCheck(e.FullPath) = True Then
+                        System.IO.File.Copy(e.FullPath, tennsousaki & "\" & fname, True)
+                    Else
+                        flg = False
+                        errorstr = "転送タイムアウト"
+                    End If
+                Catch ex As System.IO.FileNotFoundException 'コピーする元ファイルがない場合
                     flg = False
                     errorstr = ex.Message
                 Catch ex As System.IO.DirectoryNotFoundException 'コピー先のファルダが存在しない
@@ -239,29 +332,198 @@ Public Class Form1
         End If
 
 
-        If flg = False Then
+        If flg = False Then 'エラー時処理
 
-            fname = errorstr
-            fname = fname & "_" & fnarray(1)
-            fname = fname & "_" & fnarray(2)
-            fname = fname & "_" & fnarray(3)
-            If fnarray.Length = 4 Then
-                fname = fname
+            If IsNumeric(fnarray(0)) And fnarray(0) < 1000 Then
+
+                fname = errorstr
+                fname &= "_" & fnarray(2)
+                fname &= "_" & fnarray(3)
+                fname &= "_" & fnarray(4)
+                If fnarray.Length = 5 Then
+                    fname &= ""
+                Else
+                    fname &= " _" & fnarray(5)
+                End If
+                fname &= ".pdf"
+
             Else
-                fname = fname & " _" & fnarray(4)
-            End If
-            fname = fname & ".pdf"
 
-            System.Threading.Thread.Sleep(500) '-----IWDTのエラー回避、もうちょっと工夫した方がいいかも・・・
-            System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
+                fname = errorstr
+                fname &= "_" & fnarray(1)
+                fname &= "_" & fnarray(2)
+                fname &= "_" & fnarray(3)
+                If fnarray.Length = 4 Then
+                    fname &= ""
+                Else
+                    fname &= " _" & fnarray(4)
+                End If
+                fname &= ".pdf"
+            End If
+
+            If FileOpenCheck(e.FullPath) = True Then
+                System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
+            End If
+
 
         End If
 
+        If FileOpenCheck(e.FullPath) = True Then
+            System.IO.File.Delete(e.FullPath)
+        End If
 
-        System.IO.File.Delete(e.FullPath)
+    End Sub
+
+    Private Sub 荷主名保存(ByVal ninusiID As Integer, ByVal ninusimeiTF As String)
+
+        Dim sqlstr As String = "UPDATE T_TF_M_NinusiInfo SET 名称_TF = '" & ninusimeiTF & "' WHERE 荷主ID =" & ninusiID
+
+        Dim cn As SqlClient.SqlConnection
+        Dim cmd As SqlClient.SqlCommand
+
+        cn = New SqlClient.SqlConnection(cnstr)
+        cn.Open()
+
+        cmd = cn.CreateCommand
+        cmd.CommandText = sqlstr
+        cmd.ExecuteNonQuery()
+
+        cmd.Dispose()
+        cn.Close()
+        cn.Dispose()
+
+    End Sub
+    Private Sub FAX番号保存(ByVal ninusiID As Integer, ByVal FAXbanngou As String)
+
+        Dim sqlstr As String = "UPDATE T_TF_M_NinusiInfo SET FAX番号 = '" & FAXbanngou & "' WHERE 荷主ID =" & ninusiID
+
+        Dim cn As SqlClient.SqlConnection
+        Dim cmd As SqlClient.SqlCommand
+
+        cn = New SqlClient.SqlConnection(cnstr)
+        cn.Open()
+
+        cmd = cn.CreateCommand
+        cmd.CommandText = sqlstr
+        cmd.ExecuteNonQuery()
+
+        cmd.Dispose()
+        cn.Close()
+        cn.Dispose()
+
+    End Sub
+
+    Public Sub scan転送開始()
+
+        If Not (swatcher Is Nothing) Then
+            Return
+        End If
+
+        swatcher = New System.IO.FileSystemWatcher
+
+        tennsoumoto = txt転送元.Text
+        scan = txtscan.Text
+
+        '監視するディレクトリを指定
+        swatcher.Path = scan
+
+        '最終アクセス日時、最終更新日時、ファイル、フォルダ名の変更を監視する
+        swatcher.NotifyFilter = System.IO.NotifyFilters.FileName
+
+        'すべてのファイルを監視
+        swatcher.Filter = ""
+
+        'UIのスレッドにマーシャリングする
+        'コンソールアプリケーションでの使用では必要ない
+        swatcher.SynchronizingObject = Me
+
+        'イベントハンドラの追加
+        'AddHandler swatcher.Changed, AddressOf swatcher_Changed
+        AddHandler swatcher.Created, AddressOf swatcher_Changed
+        'AddHandler swatcher.Deleted, AddressOf swatcher_Changed
+        'AddHandler swatcher.Renamed, AddressOf swatcher_Renamed
+
+        '監視を開始する
+        swatcher.EnableRaisingEvents = True
+        Console.WriteLine("scan転送を開始しました。")
 
 
     End Sub
+
+    Public Sub scan転送停止()
+
+        '監視を終了
+        swatcher.EnableRaisingEvents = False
+        swatcher.Dispose()
+        swatcher = Nothing
+        Console.WriteLine("scan転送を終了しました。")
+
+    End Sub
+
+    Private Sub swatcher_Changed(ByVal source As System.Object, ByVal e As System.IO.FileSystemEventArgs)
+
+        Select Case e.ChangeType
+            Case System.IO.WatcherChangeTypes.Changed
+                Console.WriteLine(("ファイル 「" + e.FullPath + "」が変更されました。"))
+            Case System.IO.WatcherChangeTypes.Deleted
+                Console.WriteLine(("ファイル 「" + e.FullPath + "」が削除されました。"))
+            Case System.IO.WatcherChangeTypes.Created
+                Console.WriteLine(("ファイル 「" + e.FullPath + "」が作成されました。"))
+
+                Dim fname As String = Path.GetFileName(e.FullPath)
+                Dim kakutyousi As String = Path.GetExtension(e.FullPath)
+
+                If kakutyousi = ".pdf" Then
+
+                    fname = "scan__" & fname
+
+                End If
+
+                If FileOpenCheck(e.FullPath) = True Then
+                    System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
+                    System.IO.File.Delete(e.FullPath)
+                Else
+                    MsgBox("scan転送タイムアウト")
+                End If
+
+
+        End Select
+
+    End Sub
+    Private Sub swatcher_Renamed(ByVal source As System.Object, ByVal e As System.IO.RenamedEventArgs)
+        Console.WriteLine(("ファイル 「" + e.FullPath + "」の名前が変更されました。"))
+    End Sub
+
+    Private Function FileOpenCheck(fpath As String) As Boolean
+
+        Dim st As Stream = Nothing
+        Dim maxcount As Integer = 60
+        Dim i As Integer
+        Dim c As Integer
+
+        For i = 0 To maxcount
+            Try
+                st = File.Open(fpath, FileMode.Open, FileAccess.Read, FileShare.None)
+                If Not st Is Nothing Then
+                    Console.WriteLine(c)
+                    Exit For
+                End If
+            Catch ex As Exception
+                System.Threading.Thread.Sleep(1000)
+                c += 1
+            End Try
+        Next i
+
+        If Not st Is Nothing Then
+            st.Close()
+            FileOpenCheck = True
+        Else
+            ' タイムアウト
+            FileOpenCheck = False
+        End If
+
+    End Function
+
 
     Private Sub btn参照1_Click(sender As Object, e As EventArgs) Handles btn参照1.Click
         If lblステータス.Text = "稼働中" Then
@@ -311,6 +573,23 @@ Public Class Form1
         End If
     End Sub
 
+    Private Sub btn参照4_Click(sender As Object, e As EventArgs) Handles btn参照4.Click
+        If lblステータス.Text = "稼働中" Then
+            MsgBox("稼働中はフォルダを変更できません")
+        Else
+            Dim fbd As New FolderBrowserDialog
+            fbd.Description = "フォルダを指定してください。"
+            fbd.RootFolder = Environment.SpecialFolder.Desktop
+            fbd.SelectedPath = "C:\Windows"
+            fbd.ShowNewFolderButton = True
+
+            If fbd.ShowDialog(Me) = DialogResult.OK Then
+                txtscan.Text = fbd.SelectedPath
+            End If
+        End If
+    End Sub
+
+
     Private Sub btnテスト_Click(sender As Object, e As EventArgs) Handles btnテスト.Click
 
 
@@ -324,6 +603,7 @@ Public Class SettingItemClass
     Public tennsoumoto As String
     Public kannsi As String
     Public tennsousaki As String
+    Public scan As String
 End Class
 
 Class SettingClass
@@ -338,6 +618,7 @@ Class SettingClass
         obj.tennsoumoto = Form1.txt転送元.Text
         obj.kannsi = Form1.txt監視.Text
         obj.tennsousaki = Form1.txt転送先.Text
+        obj.scan = Form1.txtscan.Text
 
         Dim serializer As New System.Xml.Serialization.XmlSerializer(GetType(SettingItemClass))
         Dim sw As New System.IO.StreamWriter(strPath, False, New System.Text.UTF8Encoding(False))
@@ -360,6 +641,7 @@ Class SettingClass
         Form1.txt転送元.Text = obj.tennsoumoto
         Form1.txt監視.Text = obj.kannsi
         Form1.txt転送先.Text = obj.tennsousaki
+        Form1.txtscan.Text = obj.scan
 
         sr.Close()
 

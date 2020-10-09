@@ -36,6 +36,9 @@ Partial Class Form1
         Me.btn1 = New System.Windows.Forms.Button()
         Me.btnテスト = New System.Windows.Forms.Button()
         Me.EventLog1 = New System.Diagnostics.EventLog()
+        Me.btn参照4 = New System.Windows.Forms.Button()
+        Me.Label4 = New System.Windows.Forms.Label()
+        Me.txtscan = New System.Windows.Forms.TextBox()
         CType(Me.EventLog1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -48,14 +51,14 @@ Partial Class Form1
         '
         'txt監視
         '
-        Me.txt監視.Location = New System.Drawing.Point(108, 279)
+        Me.txt監視.Location = New System.Drawing.Point(108, 258)
         Me.txt監視.Name = "txt監視"
         Me.txt監視.Size = New System.Drawing.Size(313, 19)
         Me.txt監視.TabIndex = 1
         '
         'txt転送先
         '
-        Me.txt転送先.Location = New System.Drawing.Point(108, 336)
+        Me.txt転送先.Location = New System.Drawing.Point(108, 306)
         Me.txt転送先.Name = "txt転送先"
         Me.txt転送先.Size = New System.Drawing.Size(313, 19)
         Me.txt転送先.TabIndex = 2
@@ -72,7 +75,7 @@ Partial Class Form1
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(38, 282)
+        Me.Label2.Location = New System.Drawing.Point(38, 261)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(64, 12)
         Me.Label2.TabIndex = 4
@@ -81,7 +84,7 @@ Partial Class Form1
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(26, 339)
+        Me.Label3.Location = New System.Drawing.Point(26, 309)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(76, 12)
         Me.Label3.TabIndex = 5
@@ -98,7 +101,7 @@ Partial Class Form1
         '
         'btn参照2
         '
-        Me.btn参照2.Location = New System.Drawing.Point(436, 277)
+        Me.btn参照2.Location = New System.Drawing.Point(436, 256)
         Me.btn参照2.Name = "btn参照2"
         Me.btn参照2.Size = New System.Drawing.Size(75, 23)
         Me.btn参照2.TabIndex = 7
@@ -107,7 +110,7 @@ Partial Class Form1
         '
         'btn参照3
         '
-        Me.btn参照3.Location = New System.Drawing.Point(436, 334)
+        Me.btn参照3.Location = New System.Drawing.Point(436, 304)
         Me.btn参照3.Name = "btn参照3"
         Me.btn参照3.Size = New System.Drawing.Size(75, 23)
         Me.btn参照3.TabIndex = 8
@@ -128,7 +131,7 @@ Partial Class Form1
         '
         'btn1
         '
-        Me.btn1.Location = New System.Drawing.Point(436, 109)
+        Me.btn1.Location = New System.Drawing.Point(436, 115)
         Me.btn1.Name = "btn1"
         Me.btn1.Size = New System.Drawing.Size(75, 23)
         Me.btn1.TabIndex = 11
@@ -137,7 +140,7 @@ Partial Class Form1
         '
         'btnテスト
         '
-        Me.btnテスト.Location = New System.Drawing.Point(436, 396)
+        Me.btnテスト.Location = New System.Drawing.Point(436, 41)
         Me.btnテスト.Name = "btnテスト"
         Me.btnテスト.Size = New System.Drawing.Size(75, 23)
         Me.btnテスト.TabIndex = 12
@@ -149,11 +152,39 @@ Partial Class Form1
         '
         Me.EventLog1.SynchronizingObject = Me
         '
+        'btn参照4
+        '
+        Me.btn参照4.Location = New System.Drawing.Point(436, 402)
+        Me.btn参照4.Name = "btn参照4"
+        Me.btn参照4.Size = New System.Drawing.Size(75, 23)
+        Me.btn参照4.TabIndex = 15
+        Me.btn参照4.Text = "参照"
+        Me.btn参照4.UseVisualStyleBackColor = True
+        '
+        'Label4
+        '
+        Me.Label4.AutoSize = True
+        Me.Label4.Location = New System.Drawing.Point(38, 407)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(64, 12)
+        Me.Label4.TabIndex = 14
+        Me.Label4.Text = "scanフォルダ"
+        '
+        'txtscan
+        '
+        Me.txtscan.Location = New System.Drawing.Point(108, 404)
+        Me.txtscan.Name = "txtscan"
+        Me.txtscan.Size = New System.Drawing.Size(313, 19)
+        Me.txtscan.TabIndex = 13
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(546, 450)
+        Me.Controls.Add(Me.btn参照4)
+        Me.Controls.Add(Me.Label4)
+        Me.Controls.Add(Me.txtscan)
         Me.Controls.Add(Me.btnテスト)
         Me.Controls.Add(Me.btn1)
         Me.Controls.Add(Me.lblステータス)
@@ -188,4 +219,7 @@ Partial Class Form1
     Friend WithEvents btn1 As Button
     Friend WithEvents btnテスト As Button
     Friend WithEvents EventLog1 As EventLog
+    Friend WithEvents btn参照4 As Button
+    Friend WithEvents Label4 As Label
+    Friend WithEvents txtscan As TextBox
 End Class
