@@ -6,6 +6,7 @@ Imports System.Runtime.Serialization.Formatters.Binary
 Imports System.Windows.Forms
 Imports Microsoft.Win32
 Imports System.Threading
+Imports System.Globalization
 
 Public Class Form1
 
@@ -147,8 +148,10 @@ Public Class Form1
 
         'Console.WriteLine(("ファイル 「" + e.FullPath + "」の名前が変更されました。"))
 
-        Dim fname As String = Path.GetFileNameWithoutExtension(e.FullPath)
-        fname = Replace(fname, Space(1), String.Empty)
+        Dim fname As String = Path.GetFileNameWithoutExtension(e.FullPath) 'ファイル名
+        Dim kakutyousi As String = Path.GetExtension(e.FullPath) '拡張子
+
+        '        fname = Replace(fname, Space(1), String.Empty)
         Dim fnarray As Array = Split(fname, "_")
 
         Dim flg As Boolean = True
@@ -209,168 +212,212 @@ Public Class Form1
                 cn.Close()
                 cn.Dispose()
 
-                '####################################################################ここからファイル名組み立て
 
-                If zyutyuuCD < 1000 Then '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&受注以外の処理（受注CD三桁以下）
 
-                    If fnarray(2) = "登録名称不明" Or fnarray(2) = "scan" Or fnarray(2) = "" Then '荷主名
-                        If ninusimeiTF = "" Then
-                            fname = ninusimeiHND
+                Dim yousosuu As Integer = fnarray.Length
+                Dim TSiti As Integer
+                Dim dt As Date
+                For TSiti = 0 To yousosuu - 1
+                    If DateTime.TryParseExact(fnarray(TSiti), "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
+                        Exit For
+                    Else
+                        'MsgBox(i & " " & fnarray(i))
+                    End If
+                Next
+
+                If yousosuu >= 4 Then '配列の要素数チェック----要素数4以上
+                    '###########################################################################################ファイル名組み立て開始
+                    If zyutyuuCD < 1000 Then '--------------------------------------------------------------------------------受注以外の処理（受注CD三桁以下）
+
+                        Dim str As String = fnarray(1)
+                        Dim strarray As Array = Split(str, "-")
+                        Dim datestr As String = strarray(0)
+
+                        If Date.TryParseExact(datestr, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then '送信時に入力する文字列が日付の場合
+                            sdate = datestr
+                            edate = datestr
+                            If strarray.Length > 1 Then
+                                bikou = strarray(1)
+                                If strarray.Length > 2 Then
+                                    Dim i As Integer
+                                    For i = 2 To strarray.Length - 1
+                                        bikou &= "-" & strarray(i)
+                                    Next
+                                End If
+                            End If
+                        Else '-----------------------------------------------------------送信時に入力する文字列が日付以外の場合
+                            bikou = str
+
+                        End If
+
+
+
+
+
+                        If fnarray(2) = "登録名称不明" Or fnarray(2) = "scan" Or fnarray(2) = "" Then '荷主名
+                                If ninusimeiTF = "" Then
+                                    fname = ninusimeiHND
+                                Else
+                                    fname = ninusimeiTF
+                                End If
+                            Else
+                                fname = fnarray(2)
+                            End If
+
+                            If fnarray(3) = "" Then '---------------------------------------FAX番号
+                                If FAXbanngou = "" Then
+                                    fname &= "_" & ""
+                                Else
+                                    fname &= "_" & FAXbanngou
+                                End If
+                            Else
+                                fname &= "_" & fnarray(3)
+                            End If
+
+                            fname &= "_" & fnarray(4) '-------------------------------------タイムスタンプ
+                            fname &= "_" & fnarray(0) '-------------------------------------受注CD
+                            fname &= "_" & sdate '------------------------------------------開始日
+                            fname &= "_" & edate '------------------------------------------終了日
+                            fname &= "_" & busyo '------------------------------------------担当部署
+                            fname &= "_" & bikou '------------------------------------------備考
+                            If fnarray.Length = 5 Then '------------------------------------ページ
+                                fname &= "_1"
+                            Else
+                                fname &= "_" & fnarray(5)
+                            End If
+                            fname &= ".pdf" '-----------------------------------------------拡張子
+
+
+
+                        Else '-----------------------------------------------------------------------------------------------------------------通常受注処理
+
+                        If fnarray(1) = "登録名称不明" Or fnarray(1) = "scan" Or fnarray(1) = "取込" Or fnarray(1) = "" Then '荷主名
+                            If ninusimeiTF = "" Then
+                                fname = ninusimeiHND
+                            Else
+                                fname = ninusimeiTF
+                            End If
                         Else
-                            fname = ninusimeiTF
+                            fname = fnarray(1)
+                            If ninusimeiTF = "" Then
+                                荷主名保存(ninusiID, fnarray(1))
+                            End If
                         End If
-                    Else
-                        fname = fnarray(2)
-                    End If
 
-                    If fnarray(3) = "" Then '---------------------------------------FAX番号
-                        If FAXbanngou = "" Then
-                            fname &= "_" & ""
+                        If fnarray(2) = "" Then '---------------------------------------FAX番号
+                            If FAXbanngou = "" Then
+                                fname &= "_" & ""
+                            Else
+                                fname &= "_" & FAXbanngou
+                            End If
                         Else
-                            fname &= "_" & FAXbanngou
+                            fname &= "_" & fnarray(2)
+                            If FAXbanngou = "" Then
+                                FAX番号保存(ninusiID, fnarray(2))
+                            End If
                         End If
-                    Else
-                        fname &= "_" & fnarray(3)
-                    End If
 
-                    fname &= "_" & fnarray(4) '-------------------------------------タイムスタンプ
-                    fname &= "_" & fnarray(0) '-------------------------------------受注CD
-                    fname &= "_" & sdate '------------------------------------------開始日
-                    fname &= "_" & edate '------------------------------------------終了日
-                    fname &= "_" & busyo '------------------------------------------担当部署
-                    fname &= "_" & fnarray(1) '-------------------------------------備考
-                    If fnarray.Length = 5 Then '------------------------------------ページ
-                        fname &= "_1"
-                    Else
-                        fname &= "_" & fnarray(5)
-                    End If
-                    fname &= ".pdf" '-----------------------------------------------拡張子
-
-
-                Else '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&受注の処理
-
-                    If fnarray(1) = "登録名称不明" Or fnarray(1) = "scan" Or fnarray(1) = "" Then '荷主名
-                        If ninusimeiTF = "" Then
-                            fname = ninusimeiHND
+                        fname &= "_" & fnarray(3) '-------------------------------------タイムスタンプ
+                        fname &= "_" & fnarray(0) '-------------------------------------受注CD
+                        fname &= "_" & sdate '------------------------------------------開始日
+                        fname &= "_" & edate '------------------------------------------終了日
+                        fname &= "_" & busyo '------------------------------------------担当部署
+                        fname &= "_" & bikou '------------------------------------------備考
+                        If fnarray.Length = 4 Then '------------------------------------ページ
+                            fname &= "_1"
                         Else
-                            fname = ninusimeiTF
+                            fname &= "_" & fnarray(4)
                         End If
-                    Else
-                        fname = fnarray(1)
-                        If ninusimeiTF = "" Then
-                            荷主名保存(ninusiID, fnarray(1))
-                        End If
-                    End If
+                        fname &= ".pdf" '-----------------------------------------------拡張子
 
-                    If fnarray(2) = "" Then '---------------------------------------FAX番号
-                        If FAXbanngou = "" Then
-                            fname &= "_" & ""
+                    End If
+                    '#############################################################################################ファイル組み立て終了
+
+                    Try '-----ファイルのコピー処理
+                        If FileOpenCheck(e.FullPath) = True Then
+                            System.IO.File.Copy(e.FullPath, tennsousaki & "\" & fname, True)
                         Else
-                            fname &= "_" & FAXbanngou
+                            flg = False
+                            errorstr = "転送タイムアウト"
                         End If
-                    Else
-                        fname &= "_" & fnarray(2)
-                        If FAXbanngou = "" Then
-                            FAX番号保存(ninusiID, fnarray(2))
-                        End If
-                    End If
-
-                    fname &= "_" & fnarray(3) '-------------------------------------タイムスタンプ
-                    fname &= "_" & fnarray(0) '-------------------------------------受注CD
-                    fname &= "_" & sdate '------------------------------------------開始日
-                    fname &= "_" & edate '------------------------------------------終了日
-                    fname &= "_" & busyo '------------------------------------------担当部署
-                    fname &= "_" & bikou '------------------------------------------備考
-                    If fnarray.Length = 4 Then '------------------------------------ページ
-                        fname &= "_1"
-                    Else
-                        fname &= "_" & fnarray(4)
-                    End If
-                    fname &= ".pdf" '-----------------------------------------------拡張子
-
-                End If
-                '###################################################################ファイル名組み立て終了
-
-
-                Try '-----ファイルのコピー処理
-                    If FileOpenCheck(e.FullPath) = True Then
-                        System.IO.File.Copy(e.FullPath, tennsousaki & "\" & fname, True)
-                    Else
+                    Catch ex As System.IO.FileNotFoundException 'コピーする元ファイルがない場合
                         flg = False
-                        errorstr = "転送タイムアウト"
-                    End If
-                Catch ex As System.IO.FileNotFoundException 'コピーする元ファイルがない場合
-                    flg = False
-                    errorstr = ex.Message
-                Catch ex As System.IO.DirectoryNotFoundException 'コピー先のファルダが存在しない
-                    flg = False
-                    errorstr = ex.Message
-                Catch ex As System.IO.IOException 'コピー先のファイルがすでに存在している場合
-                    flg = False
-                    errorstr = ex.Message
-                Catch ex As System.UnauthorizedAccessException 'コピー先のファイルへのアクセスが拒否された場合
-                    flg = False
-                    errorstr = ex.Message
-                End Try
+                        errorstr = ex.Message
+                    Catch ex As System.IO.DirectoryNotFoundException 'コピー先のファルダが存在しない
+                        flg = False
+                        errorstr = ex.Message
+                    Catch ex As System.IO.IOException 'コピー先のファイルがすでに存在している場合
+                        flg = False
+                        errorstr = ex.Message
+                    Catch ex As System.UnauthorizedAccessException 'コピー先のファイルへのアクセスが拒否された場合
+                        flg = False
+                        errorstr = ex.Message
+                    End Try
 
-                'MsgBox(fname)
+                    'MsgBox(fname)
 
-            Else '--------------------------レコードなし
+                Else '----------------------------------------------要素数4未満
+                    flg = False
+                    errorstr = "ファイル名不正"
+                End If
 
+            Else '受注CD適合なし
                 flg = False
                 errorstr = "受注CD該当なし"
-
             End If
 
-
-
-        Else '-数値以外
-
+        Else '数値以外
             flg = False
             errorstr = "受注CD不正"
-
         End If
 
 
-        If flg = False Then 'エラー時処理
+        If flg = False Then '---------------------------------------------------------------------------------------------------エラー時処理
 
-            If IsNumeric(fnarray(0)) And fnarray(0) < 1000 Then
+            Dim ac As Integer = fnarray.Length
+            Dim i As Integer
+
+            If fnarray(0) = "501" Or fnarray(0) = "601" Or fnarray(0) = "701" Or fnarray(0) = "801" Or fnarray(0) = "901" Then
 
                 fname = errorstr
                 fname &= "_" & fnarray(2)
-                fname &= "_" & fnarray(3)
-                fname &= "_" & fnarray(4)
-                If fnarray.Length = 5 Then
-                    fname &= ""
-                Else
-                    fname &= " _" & fnarray(5)
+                If ac > 3 Then
+                    For i = 4 To ac
+                        If i < ac Then
+                            fname &= "_" & fnarray(i)
+                        End If
+                    Next
+                    fname &= ".pdf"
                 End If
-                fname &= ".pdf"
 
             Else
 
                 fname = errorstr
                 fname &= "_" & fnarray(1)
-                fname &= "_" & fnarray(2)
-                fname &= "_" & fnarray(3)
-                If fnarray.Length = 4 Then
-                    fname &= ""
-                Else
-                    fname &= " _" & fnarray(4)
+                If ac > 2 Then
+                    For i = 2 To ac
+                        MsgBox(i)
+                        If i < ac Then
+                            fname &= "_" & fnarray(i)
+                        End If
+                    Next
+                    fname &= ".pdf"
                 End If
-                fname &= ".pdf"
+
             End If
 
             If FileOpenCheck(e.FullPath) = True Then
-                System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
+                System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False) 'エラーコードを付けて転送元へ返信
             End If
-
 
         End If
 
         If FileOpenCheck(e.FullPath) = True Then
-            System.IO.File.Delete(e.FullPath)
+            System.IO.File.Delete(e.FullPath) '作業ファイル削除
         End If
+
+
+
 
     End Sub
 
@@ -441,7 +488,7 @@ Public Class Form1
         'AddHandler swatcher.Changed, AddressOf swatcher_Changed
         AddHandler swatcher.Created, AddressOf swatcher_Changed
         'AddHandler swatcher.Deleted, AddressOf swatcher_Changed
-        'AddHandler swatcher.Renamed, AddressOf swatcher_Renamed
+        AddHandler swatcher.Renamed, AddressOf swatcher_Renamed
 
         '監視を開始する
         swatcher.EnableRaisingEvents = True
@@ -470,28 +517,51 @@ Public Class Form1
             Case System.IO.WatcherChangeTypes.Created
                 Console.WriteLine(("ファイル 「" + e.FullPath + "」が作成されました。"))
 
-                Dim fname As String = Path.GetFileName(e.FullPath)
                 Dim kakutyousi As String = Path.GetExtension(e.FullPath)
 
-                If kakutyousi = ".pdf" Then
+                If kakutyousi <> ".tmp" Then
+
+                    Dim fname As String = Path.GetFileName(e.FullPath)
 
                     fname = "scan__" & fname
 
-                End If
+                    If FileOpenCheck(e.FullPath) = True Then
+                        System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
+                    End If
 
-                If FileOpenCheck(e.FullPath) = True Then
-                    System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
-                    System.IO.File.Delete(e.FullPath)
-                Else
-                    MsgBox("scan転送タイムアウト")
-                End If
+                    If FileOpenCheck(e.FullPath) = True Then
+                        System.IO.File.Delete(e.FullPath)
+                    End If
 
+                End If
 
         End Select
 
     End Sub
     Private Sub swatcher_Renamed(ByVal source As System.Object, ByVal e As System.IO.RenamedEventArgs)
-        Console.WriteLine(("ファイル 「" + e.FullPath + "」の名前が変更されました。"))
+        'Console.WriteLine(("ファイル 「" + e.FullPath + "」の名前が変更されました。"))
+
+
+        Dim fname As String = Path.GetFileNameWithoutExtension(e.FullPath)
+        Dim kakutyousi As String = Path.GetExtension(e.FullPath)
+        Dim dt As Date
+
+
+        'MsgBox(fname & kakutyousi)
+
+        If DateTime.TryParseExact(fname, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
+            fname = "取込__" & fname & kakutyousi
+        Else
+            fname = "取込__" & Format(Now(), "yyyymmddhhmmss") & kakutyousi
+        End If
+
+
+        If FileOpenCheck(e.FullPath) = True Then
+            System.IO.File.Copy(e.FullPath, tennsoumoto & "\" & fname, False)
+        End If
+        If FileOpenCheck(e.FullPath) = True Then
+            System.IO.File.Delete(e.FullPath)
+        End If
     End Sub
 
     Private Function FileOpenCheck(fpath As String) As Boolean
@@ -505,7 +575,7 @@ Public Class Form1
             Try
                 st = File.Open(fpath, FileMode.Open, FileAccess.Read, FileShare.None)
                 If Not st Is Nothing Then
-                    Console.WriteLine(c)
+                    'Console.WriteLine(c)
                     Exit For
                 End If
             Catch ex As Exception
