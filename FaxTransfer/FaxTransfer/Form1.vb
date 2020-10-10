@@ -396,7 +396,6 @@ Public Class Form1
                 fname &= "_" & fnarray(1)
                 If ac > 2 Then
                     For i = 2 To ac
-                        MsgBox(i)
                         If i < ac Then
                             fname &= "_" & fnarray(i)
                         End If
