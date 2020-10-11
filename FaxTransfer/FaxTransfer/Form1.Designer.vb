@@ -22,6 +22,7 @@ Partial Class Form1
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.txt転送元 = New System.Windows.Forms.TextBox()
         Me.txt監視 = New System.Windows.Forms.TextBox()
@@ -39,7 +40,12 @@ Partial Class Form1
         Me.btn参照4 = New System.Windows.Forms.Button()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.txtscan = New System.Windows.Forms.TextBox()
+        Me.RadioButton1 = New System.Windows.Forms.RadioButton()
+        Me.RadioButton2 = New System.Windows.Forms.RadioButton()
+        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         CType(Me.EventLog1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
         'txt転送元
@@ -140,13 +146,12 @@ Partial Class Form1
         '
         'btnテスト
         '
-        Me.btnテスト.Location = New System.Drawing.Point(436, 41)
+        Me.btnテスト.Location = New System.Drawing.Point(436, 431)
         Me.btnテスト.Name = "btnテスト"
         Me.btnテスト.Size = New System.Drawing.Size(75, 23)
         Me.btnテスト.TabIndex = 12
         Me.btnテスト.Text = "テスト"
         Me.btnテスト.UseVisualStyleBackColor = True
-        Me.btnテスト.Visible = False
         '
         'EventLog1
         '
@@ -177,11 +182,49 @@ Partial Class Form1
         Me.txtscan.Size = New System.Drawing.Size(313, 19)
         Me.txtscan.TabIndex = 13
         '
+        'RadioButton1
+        '
+        Me.RadioButton1.AutoSize = True
+        Me.RadioButton1.Location = New System.Drawing.Point(6, 27)
+        Me.RadioButton1.Name = "RadioButton1"
+        Me.RadioButton1.Size = New System.Drawing.Size(83, 16)
+        Me.RadioButton1.TabIndex = 16
+        Me.RadioButton1.TabStop = True
+        Me.RadioButton1.Text = "イベント監視"
+        Me.RadioButton1.UseVisualStyleBackColor = True
+        '
+        'RadioButton2
+        '
+        Me.RadioButton2.AutoSize = True
+        Me.RadioButton2.Location = New System.Drawing.Point(6, 49)
+        Me.RadioButton2.Name = "RadioButton2"
+        Me.RadioButton2.Size = New System.Drawing.Size(83, 16)
+        Me.RadioButton2.TabIndex = 17
+        Me.RadioButton2.TabStop = True
+        Me.RadioButton2.Text = "タイマー監視"
+        Me.RadioButton2.UseVisualStyleBackColor = True
+        '
+        'GroupBox1
+        '
+        Me.GroupBox1.Controls.Add(Me.RadioButton1)
+        Me.GroupBox1.Controls.Add(Me.RadioButton2)
+        Me.GroupBox1.Location = New System.Drawing.Point(436, 33)
+        Me.GroupBox1.Name = "GroupBox1"
+        Me.GroupBox1.Size = New System.Drawing.Size(106, 76)
+        Me.GroupBox1.TabIndex = 18
+        Me.GroupBox1.TabStop = False
+        Me.GroupBox1.Text = "処理選択"
+        '
+        'Timer1
+        '
+        Me.Timer1.Interval = 1000
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(546, 450)
+        Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btn参照4)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.txtscan)
@@ -201,6 +244,8 @@ Partial Class Form1
         Me.Name = "Form1"
         Me.Text = "FaxTransfer"
         CType(Me.EventLog1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.GroupBox1.ResumeLayout(False)
+        Me.GroupBox1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -222,4 +267,8 @@ Partial Class Form1
     Friend WithEvents btn参照4 As Button
     Friend WithEvents Label4 As Label
     Friend WithEvents txtscan As TextBox
+    Friend WithEvents GroupBox1 As GroupBox
+    Friend WithEvents RadioButton1 As RadioButton
+    Friend WithEvents RadioButton2 As RadioButton
+    Friend WithEvents Timer1 As Timer
 End Class
