@@ -1,0 +1,670 @@
+﻿Imports System.Globalization
+Imports System.IO
+
+Public Class Form1
+
+
+
+    'DBの接続文字列
+    Dim cnstr As String = "Data Source=SV201710;Initial Catalog=HINODEDB;USER ID=sa;PASSWORD=cube%6614;"
+
+    '転送1
+    'Fax受信⇒ThereforDATA　（Therefor上にアップロードするリネーム処理）
+    Dim kannsi1 As String = ""
+    Dim saki1 As String = ""
+    Dim moto1 As String = ""
+
+    '転送1
+    'scam⇒Fax受信　（スキャン時のリネーム処理）
+    Dim kannsi2 As String = ""
+    Dim saki2 As String = ""
+    Dim moto2 As String = ""
+
+    '監視インターバル
+    Dim interval As Integer = 0
+
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        SettingClass.設定読込()
+        'DataGridSetting()
+
+        Me.UserControl1.Visible = False
+        Me.UserControl2.Visible = False
+
+    End Sub
+
+    Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+
+        If lblステータス.Text = "稼働中" Then
+            MsgBox("稼働中は閉じることができません！")
+            e.Cancel = True
+        Else
+            SettingClass.設定保存()
+        End If
+
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click 'ON/OFF切り替え
+
+        If Me.CheckBox1.Checked = False Then
+            'If Me.UserControl1.TextBox1.Text <> "" And Me.UserControl1.TextBox2.Text <> "" And Me.UserControl1.TextBox3.Text <> "" And Me.UserControl1.TextBox4.Text <> "" And Me.UserControl1.TextBox5.Text <> "" And Me.UserControl1.TextBox6.Text <> "" And Me.UserControl1.TextBox7.Text <> "" Then
+
+            Me.CheckBox1.Checked = True
+
+            'End If
+        Else
+            Dim result As DialogResult = MessageBox.Show("FAX転送を停止しますか？", "確認メッセージ", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2)
+            If result = DialogResult.OK Then
+                Dim inputText As String
+                inputText = InputBox("パスワードを入力してください。", "確認メッセージ", "", Me.Left + 300, Me.Top + 200)
+                If inputText = "Hinode8739" Then
+
+                    Me.CheckBox1.Checked = False
+                    MsgBox("転送を停止しました。")
+
+                Else
+                    MsgBox("パスワードが違います！")
+                End If
+
+            End If
+
+
+        End If
+                ONOFF切り替え()
+
+    End Sub
+
+    Private Sub ONOFF切り替え()
+
+        If Me.CheckBox1.Checked = True Then
+
+            lblステータス.Text = "稼働中"
+            Button1.Text = "停止"
+            kannsi1 = Me.UserControl1.TextBox1.Text
+            saki1 = Me.UserControl1.TextBox2.Text
+            moto1 = Me.UserControl1.TextBox3.Text
+            kannsi2 = Me.UserControl1.TextBox4.Text
+            saki2 = Me.UserControl1.TextBox5.Text
+            moto2 = Me.UserControl1.TextBox6.Text
+            interval = Me.UserControl1.TextBox7.Text
+            Me.UserControl1.TextBox1.ReadOnly = True
+            Me.UserControl1.TextBox2.ReadOnly = True
+            Me.UserControl1.TextBox3.ReadOnly = True
+            Me.UserControl1.TextBox4.ReadOnly = True
+            Me.UserControl1.TextBox5.ReadOnly = True
+            Me.UserControl1.TextBox6.ReadOnly = True
+            Me.UserControl1.TextBox7.ReadOnly = True
+            'Timer1.Enabled = True
+
+        Else
+            lblステータス.Text = "停止中"
+            Button1.Text = "開始"
+            Me.UserControl1.TextBox1.ReadOnly = False
+            Me.UserControl1.TextBox2.ReadOnly = False
+            Me.UserControl1.TextBox3.ReadOnly = False
+            Me.UserControl1.TextBox4.ReadOnly = False
+            Me.UserControl1.TextBox5.ReadOnly = False
+            Me.UserControl1.TextBox6.ReadOnly = False
+            Me.UserControl1.TextBox7.ReadOnly = False
+            'Timer1.Enabled = False
+
+        End If
+
+
+    End Sub
+
+    Private Async Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+
+        Await Task.Run(Sub()
+                           '転送1
+                           Dim di1 As New System.IO.DirectoryInfo(kannsi1)
+                           Dim files1 As System.IO.FileInfo() = di1.GetFiles("*", System.IO.SearchOption.AllDirectories)
+
+                           For Each f1 As System.IO.FileInfo In files1
+                               転送処理1(f1.FullName)
+                           Next
+
+                           '転送2
+                           Dim di2 As New System.IO.DirectoryInfo(kannsi2)
+                           Dim files2 As System.IO.FileInfo() = di2.GetFiles("*", System.IO.SearchOption.AllDirectories)
+
+                           For Each f2 As System.IO.FileInfo In files2
+                               転送処理2(f2.FullName)
+                           Next
+                       End Sub)
+
+    End Sub
+
+    Private Sub 転送処理1(ByVal s As String)
+
+        'MsgBox(s)'フルパス
+        'Fax受信　⇒　ThereforDATA
+
+        Dim fname As String = Path.GetFileNameWithoutExtension(s) 'ファイル名
+        Dim kakutyousi As String = Path.GetExtension(s) '拡張子
+
+        Dim fnarray As Array = Split(fname, "_")
+
+        Dim flg As Boolean = True
+        Dim errorstr As String = ""
+
+        If kakutyousi <> ".tmp" Then
+
+
+            If IsNumeric(fnarray(0)) Then '-数値
+
+                Dim zyutyuuCD As Decimal = CDec(fnarray(0))
+
+                Dim sqlstr As String = "SELECT dbo.T_TF_D_Index.受注ID, dbo.T_TF_D_Index.開始日, dbo.T_TF_D_Index.終了日, dbo.T_TF_D_Index.担当部署, dbo.T_TF_D_Index.備考, dbo.T_TF_D_Index.荷主ID, dbo.T_TF_M_NinusiInfo.名称_HND, dbo.T_TF_M_NinusiInfo.名称_TF, dbo.T_TF_M_NinusiInfo.FAX番号 "
+                sqlstr &= "FROM dbo.T_TF_D_Index LEFT OUTER JOIN dbo.T_TF_M_NinusiInfo ON dbo.T_TF_D_Index.荷主ID = dbo.T_TF_M_NinusiInfo.荷主ID "
+                sqlstr &= "WHERE (dbo.T_TF_D_Index.受注ID = " & zyutyuuCD & ")"
+
+                Dim cn As SqlClient.SqlConnection
+                Dim cmd As SqlClient.SqlCommand
+                Dim reader As SqlClient.SqlDataReader
+
+                Dim sdate As String = ""
+                Dim edate As String = ""
+                Dim busyo As String = ""
+                Dim bikou As String = ""
+                Dim ninusiID As Integer = 0
+                Dim ninusimeiHND As String = ""
+                Dim ninusimeiTF As String = ""
+                Dim FAXbanngou As String = ""
+
+                cn = New SqlClient.SqlConnection(cnstr)
+
+                cmd = cn.CreateCommand
+                cmd.CommandText = sqlstr
+
+                cn.Open()
+                'Console.WriteLine(cn.State)
+
+                reader = cmd.ExecuteReader()
+
+                If reader.HasRows = True Then '---レコードあり
+
+                    Do While reader.Read()
+                        If reader("開始日") IsNot DBNull.Value Then
+                            sdate = Format(reader("開始日"), "yyyymmdd")
+                        End If
+                        If reader("終了日") IsNot DBNull.Value Then
+                            edate = Format(reader("終了日"), "yyyymmdd")
+                        End If
+                        busyo = reader("担当部署")
+                        bikou = reader("備考")
+                        ninusiID = reader("荷主ID")
+                        ninusimeiHND = reader("名称_HND")
+                        ninusimeiTF = reader("名称_TF")
+                        FAXbanngou = reader("FAX番号")
+                    Loop
+
+                    reader.Close()
+                    cmd.Dispose()
+                    cn.Close()
+                    cn.Dispose()
+
+                    Dim yousosuu As Integer = fnarray.Length
+                    Dim TSiti As Integer
+                    Dim dt As Date
+                    For TSiti = 0 To yousosuu - 1
+                        If DateTime.TryParseExact(fnarray(TSiti), "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
+                            Exit For
+                        Else
+                            'MsgBox(i & " " & fnarray(i))
+                        End If
+                    Next
+
+                    If yousosuu >= 4 Then '配列の要素数チェック----要素数4以上
+
+                        '###########################################################################################ファイル名組み立て開始
+                        If zyutyuuCD = 501 Or zyutyuuCD = 601 Or zyutyuuCD = 701 Or zyutyuuCD = 801 Or zyutyuuCD = 901 Then '------------受注以外の処理（受注CD三桁以下）
+
+                            Dim str As String = fnarray(1)
+                            Dim strarray As Array = Split(str, "-")
+                            Dim datestr As String = strarray(0)
+
+                            If Date.TryParseExact(datestr, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then '送信時に入力する文字列が日付の場合
+                                sdate = datestr
+                                edate = datestr
+                                If strarray.Length > 1 Then
+                                    bikou = strarray(1)
+                                    If strarray.Length > 2 Then
+                                        Dim i As Integer
+                                        For i = 2 To strarray.Length - 1
+                                            bikou &= "-" & strarray(i)
+                                        Next
+                                    End If
+                                End If
+                            Else '-----------------------------------------------------------送信時に入力する文字列が日付以外の場合
+                                bikou = str
+                            End If
+
+                            If fnarray(2) = "登録名称不明" Or fnarray(2) = "scan" Or fnarray(2) = "取込" Or fnarray(2) = "" Then '荷主名
+                                If ninusimeiTF = "" Then
+                                    fname = ninusimeiHND
+                                Else
+                                    fname = ninusimeiTF
+                                End If
+                            Else
+                                fname = fnarray(2)
+                            End If
+
+                            If fnarray(3) = "" Then '---------------------------------------FAX番号
+                                If FAXbanngou = "" Then
+                                    fname &= "_" & ""
+                                Else
+                                    fname &= "_" & FAXbanngou
+                                End If
+                            Else
+                                fname &= "_" & fnarray(3)
+                            End If
+
+                            fname &= "_" & fnarray(4) '-------------------------------------タイムスタンプ
+                            fname &= "_" & fnarray(0) '-------------------------------------受注CD
+                            fname &= "_" & sdate '------------------------------------------開始日
+                            fname &= "_" & edate '------------------------------------------終了日
+                            fname &= "_" & busyo '------------------------------------------担当部署
+                            fname &= "_" & bikou '------------------------------------------備考
+                            If fnarray.Length = 5 Then '------------------------------------ページ
+                                fname &= "_1"
+                            Else
+                                fname &= "_" & fnarray(5)
+                            End If
+                            fname &= kakutyousi '-------------------------------------------拡張子
+
+
+                        Else '-----------------------------------------------------------------------------------------------------------------通常受注処理
+
+                            If fnarray(1) = "登録名称不明" Or fnarray(1) = "scan" Or fnarray(1) = "取込" Or fnarray(1) = "" Then '荷主名
+                                If ninusimeiTF = "" Then
+                                    fname = ninusimeiHND
+                                Else
+                                    fname = ninusimeiTF
+                                End If
+                            Else
+                                fname = fnarray(1)
+                                If ninusimeiTF = "" Then
+                                    荷主名保存(ninusiID, fnarray(1))
+                                End If
+                            End If
+
+                            If fnarray(2) = "" Then '---------------------------------------FAX番号
+                                If FAXbanngou = "" Then
+                                    fname &= "_" & ""
+                                Else
+                                    fname &= "_" & FAXbanngou
+                                End If
+                            Else
+                                fname &= "_" & fnarray(2)
+                                If FAXbanngou = "" Then
+                                    FAX番号保存(ninusiID, fnarray(2))
+                                End If
+                            End If
+
+                            fname &= "_" & fnarray(3) '-------------------------------------タイムスタンプ
+                            fname &= "_" & fnarray(0) '-------------------------------------受注CD
+                            fname &= "_" & sdate '------------------------------------------開始日
+                            fname &= "_" & edate '------------------------------------------終了日
+                            fname &= "_" & busyo '------------------------------------------担当部署
+                            fname &= "_" & bikou '------------------------------------------備考
+                            If fnarray.Length = 4 Then '------------------------------------ページ
+                                fname &= "_1"
+                            Else
+                                fname &= "_" & fnarray(4)
+                            End If
+                            fname &= kakutyousi '-------------------------------------------拡張子
+
+                        End If
+                        '#############################################################################################ファイル組み立て終了
+
+
+
+                        '-----------------------------------------------------------------------------------------ファイルのコピー処理
+                        ファイル転送("転送1", "", s, saki1 & "\" & fname)
+
+                        'Try 
+                        'If FileOpenCheck(s) = True Then
+                        'System.IO.File.Copy(s, saki1 & "\" & fname, True)
+                        'Else
+                        '   flg = False
+                        'errorstr = "転送タイムアウト"
+                        'End If
+                        '   Catch ex As System.IO.FileNotFoundException 'コピーする元ファイルがない場合
+                        '  flg = False
+                        ' errorstr = ex.Message
+                        'Catch ex As System.IO.DirectoryNotFoundException 'コピー先のファルダが存在しない
+                        'flg = False
+                        'errorstr = ex.Message
+                        'Catch ex As System.IO.IOException 'コピー先のファイルがすでに存在している場合
+                        'flg = False
+                        'errorstr = ex.Message
+                        'Catch ex As System.UnauthorizedAccessException 'コピー先のファイルへのアクセスが拒否された場合
+                        'flg = False
+                        'errorstr = ex.Message
+                        'End Try
+
+                        'MsgBox(fname)
+
+
+
+                    Else '----------------------------------------------要素数4未満
+                        flg = False
+                        errorstr = "ファイル名不正"
+                    End If
+
+                Else '受注CD適合なし
+                    flg = False
+                    errorstr = "受注CD該当なし"
+                End If
+
+            Else '数値以外
+                flg = False
+                errorstr = "受注CD不正"
+            End If
+
+
+            If flg = False Then '---------------------------------------------------------------------------------------------------エラー時処理
+
+                Dim ac As Integer = fnarray.Length
+                Dim i As Integer
+
+                If fnarray(0) = "501" Or fnarray(0) = "601" Or fnarray(0) = "701" Or fnarray(0) = "801" Or fnarray(0) = "901" Then
+
+                    fname = errorstr
+                    fname &= "_" & fnarray(2)
+                    If ac > 3 Then
+                        For i = 4 To ac
+                            If i < ac Then
+                                fname &= "_" & fnarray(i)
+                            End If
+                        Next
+                        fname &= kakutyousi
+                    End If
+
+                Else
+
+                    fname = errorstr
+                    fname &= "_" & fnarray(1)
+                    If ac > 2 Then
+                        For i = 2 To ac
+                            If i < ac Then
+                                fname &= "_" & fnarray(i)
+                            End If
+                        Next
+                        fname &= kakutyousi
+                    End If
+
+                End If
+
+
+                ファイル転送("転送1", errorstr, s, moto1 & "\" & fname)
+
+                'If FileOpenCheck(s) = True Then
+                'System.IO.File.Copy(s, moto1 & "\" & fname, False) 'エラーコードを付けて転送元へ返信
+                'End If
+
+            End If
+
+            'If FileOpenCheck(s) = True Then
+            'System.IO.File.Delete(s) '作業ファイル削除
+            'End If
+
+
+
+        End If '拡張子".tmp"をはじく
+
+
+    End Sub
+
+    Private Sub 転送処理2(ByVal s As String)
+
+        'MsgBox(s)'フルパス
+        'scan ⇒　FAX受信
+
+        Dim fname As String = Path.GetFileNameWithoutExtension(s)
+        Dim kakutyousi As String = Path.GetExtension(s)
+        Dim dt As Date
+
+        If kakutyousi <> ".tmp" Then
+
+            If DateTime.TryParseExact(fname, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
+                fname = "scan__" & fname & kakutyousi
+            Else
+                fname = "取込__" & Format(Now(), "yyyymmddhhmmss") & kakutyousi
+            End If
+
+            ファイル転送("転送2", "", s, saki2 & "\" & fname)
+
+            'If FileOpenCheck(s) = True Then
+            'System.IO.File.Copy(s, saki2 & "\" & fname, False)
+            'End If
+            'If FileOpenCheck(s) = True Then
+            'System.IO.File.Delete(s)
+            'End If
+
+        End If '拡張子".tmp"をはじく
+
+    End Sub
+
+    Private Sub ファイル転送(ByVal syori As String, ByVal kekka As String, ByVal a As String, ByVal b As String)
+
+        Try '-----------------------------------------------------------------------------------------ファイルのコピー処理
+            If FileOpenCheck(a) = True Then
+                System.IO.File.Copy(a, b, True)
+            End If
+        Catch ex As System.IO.FileNotFoundException '---------コピーする元ファイルがない場合
+            System.Console.WriteLine(ex.Message)
+        Catch ex As System.IO.IOException '-------------------コピー先のファイルがすでに存在している場合
+            System.Console.WriteLine(ex.Message)
+        Catch ex As System.UnauthorizedAccessException '------コピー先のファイルへのアクセスが拒否された場合
+            System.Console.WriteLine(ex.Message)
+        Catch ex As System.Exception '------------------------すべての例外
+            System.Console.WriteLine(ex.Message)
+        End Try
+
+        Try '-----------------------------------------------------------------------------------------ファイルの削除処理
+            If FileOpenCheck(a) = True Then
+                System.IO.File.Copy(a, b, True)
+            End If
+        Catch ex As System.UnauthorizedAccessException '------コ削除ファイルへのアクセスが拒否された場合
+            System.Console.WriteLine(ex.Message)
+        Catch ex As System.Exception '------------------------すべての例外
+            System.Console.WriteLine(ex.Message)
+        End Try
+
+        ログ保存(syori, kekka, Path.GetFileName(a), Path.GetFileName(b))
+
+    End Sub
+
+    Private Sub 荷主名保存(ByVal ninusiID As Integer, ByVal ninusimeiTF As String)
+
+        Dim sqlstr As String = "UPDATE T_TF_M_NinusiInfo SET 名称_TF = '" & ninusimeiTF & "' WHERE 荷主ID =" & ninusiID
+
+        Dim cn As SqlClient.SqlConnection
+        Dim cmd As SqlClient.SqlCommand
+
+        cn = New SqlClient.SqlConnection(cnstr)
+        cn.Open()
+
+        cmd = cn.CreateCommand
+        cmd.CommandText = sqlstr
+        cmd.ExecuteNonQuery()
+
+        cmd.Dispose()
+        cn.Close()
+        cn.Dispose()
+
+    End Sub
+
+    Private Sub FAX番号保存(ByVal ninusiID As Integer, ByVal FAXbanngou As String)
+
+        Dim sqlstr As String = "UPDATE T_TF_M_NinusiInfo SET FAX番号 = '" & FAXbanngou & "' WHERE 荷主ID =" & ninusiID
+
+        Dim cn As SqlClient.SqlConnection
+        Dim cmd As SqlClient.SqlCommand
+
+        cn = New SqlClient.SqlConnection(cnstr)
+        cn.Open()
+
+        cmd = cn.CreateCommand
+        cmd.CommandText = sqlstr
+        cmd.ExecuteNonQuery()
+
+        cmd.Dispose()
+        cn.Close()
+        cn.Dispose()
+
+    End Sub
+
+    Private Sub ログ保存(ByVal syori As String, ByVal kekka As String, ByVal oname As String, ByVal nname As String)
+
+        Dim sqlstr As String = ""
+
+        Dim cn As SqlClient.SqlConnection
+        Dim cmd As SqlClient.SqlCommand
+
+        cn = New SqlClient.SqlConnection(cnstr)
+        cn.Open()
+
+        cmd = cn.CreateCommand
+        cmd.CommandText = sqlstr
+        cmd.ExecuteNonQuery()
+
+        cmd.Dispose()
+        cn.Close()
+        cn.Dispose()
+
+
+    End Sub
+
+    Private Function FileOpenCheck(fpath As String) As Boolean
+
+        Dim st As Stream = Nothing
+        Dim maxcount As Integer = 60
+        Dim i As Integer
+        Dim c As Integer
+
+        For i = 0 To maxcount
+            Try
+                st = File.Open(fpath, FileMode.Open, FileAccess.Read, FileShare.None)
+                If Not st Is Nothing Then
+                    'Console.WriteLine(c)
+                    Exit For
+                End If
+            Catch ex As Exception
+                System.Threading.Thread.Sleep(1000)
+                c += 1
+            End Try
+        Next i
+
+        If Not st Is Nothing Then
+            st.Close()
+            FileOpenCheck = True
+        Else
+            ' タイムアウト
+            FileOpenCheck = False
+        End If
+
+    End Function
+
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Me.UserControl1.Visible = False
+        Me.UserControl2.Visible = False
+        Me.UserControl2.Dock = DockStyle.Fill
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        If CheckBox1.Checked = False Then
+            Me.UserControl1.Visible = True
+            Me.UserControl2.Visible = False
+            Me.UserControl1.Dock = DockStyle.Fill
+        Else
+            MsgBox("稼働中は設定変更できません。")
+        End If
+    End Sub
+
+    Private Sub DataGridSetting()
+        Dim dgv As DataGridView = Me.DataGridView1
+
+        dgv.Columns(0).Width = 60
+
+
+        dgv.Columns(1).Width = 60
+
+
+        dgv.Columns(2).Width = 600
+
+
+
+        dgv.Columns(3).Width = 200
+
+    End Sub
+
+
+
+
+End Class
+
+
+Public Class SettingItemClass
+    Public kannsi1 As String
+    Public saki1 As String
+    Public moto1 As String
+    Public kannsi2 As String
+    Public saki2 As String
+    Public moto2 As String
+    Public interval As String
+End Class
+
+Class SettingClass
+
+    Public Shared Sub 設定保存()
+
+        Dim strPath As String = System.Reflection.Assembly.GetExecutingAssembly().Location
+        strPath = System.IO.Path.GetDirectoryName(strPath)
+        strPath = strPath & "\setting.xml"
+
+        Dim obj As New SettingItemClass()
+        obj.kannsi1 = Form1.UserControl1.TextBox1.Text
+        obj.saki1 = Form1.UserControl1.TextBox2.Text
+        obj.moto1 = Form1.UserControl1.TextBox3.Text
+        obj.kannsi2 = Form1.UserControl1.TextBox4.Text
+        obj.saki2 = Form1.UserControl1.TextBox5.Text
+        obj.moto2 = Form1.UserControl1.TextBox6.Text
+        obj.interval = Form1.UserControl1.TextBox7.Text
+
+        Dim serializer As New System.Xml.Serialization.XmlSerializer(GetType(SettingItemClass))
+        Dim sw As New System.IO.StreamWriter(strPath, False, New System.Text.UTF8Encoding(False))
+        serializer.Serialize(sw, obj)
+
+        sw.Close()
+
+    End Sub
+
+    Public Shared Sub 設定読込()
+
+        Dim strPath As String = System.Reflection.Assembly.GetExecutingAssembly().Location
+        strPath = System.IO.Path.GetDirectoryName(strPath)
+        strPath = strPath & "\setting.xml"
+
+        Dim serializer As New System.Xml.Serialization.XmlSerializer(GetType(SettingItemClass))
+        Dim sr As New System.IO.StreamReader(strPath, New System.Text.UTF8Encoding(False))
+        Dim obj As SettingItemClass = DirectCast(serializer.Deserialize(sr), SettingItemClass)
+
+        Form1.UserControl1.TextBox1.Text = obj.kannsi1
+        Form1.UserControl1.TextBox2.Text = obj.saki1
+        Form1.UserControl1.TextBox3.Text = obj.moto1
+        Form1.UserControl1.TextBox4.Text = obj.kannsi2
+        Form1.UserControl1.TextBox5.Text = obj.saki2
+        Form1.UserControl1.TextBox6.Text = obj.moto2
+        Form1.UserControl1.TextBox7.Text = obj.interval
+
+        sr.Close()
+
+    End Sub
+
+
+End Class
+
