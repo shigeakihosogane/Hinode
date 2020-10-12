@@ -1,9 +1,8 @@
-﻿Imports System.Globalization
+﻿Imports System.Data.SqlClient
+Imports System.Globalization
 Imports System.IO
 
 Public Class Form1
-
-
 
     'DBの接続文字列
     Dim cnstr As String = "Data Source=SV201710;Initial Catalog=HINODEDB;USER ID=sa;PASSWORD=cube%6614;"
@@ -24,9 +23,11 @@ Public Class Form1
     Dim interval As Integer = 0
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'TODO: このコード行はデータを 'HINODEDBDataSet.T_TF_D_FileTransferLog' テーブルに読み込みます。必要に応じて移動、または削除をしてください。
+        Me.T_TF_D_FileTransferLogTableAdapter.Fill(Me.HINODEDBDataSet.T_TF_D_FileTransferLog)
 
         SettingClass.設定読込()
-        'DataGridSetting()
+        DataGridSetting()
 
         Me.UserControl1.Visible = False
         Me.UserControl2.Visible = False
@@ -47,11 +48,12 @@ Public Class Form1
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click 'ON/OFF切り替え
 
         If Me.CheckBox1.Checked = False Then
-            'If Me.UserControl1.TextBox1.Text <> "" And Me.UserControl1.TextBox2.Text <> "" And Me.UserControl1.TextBox3.Text <> "" And Me.UserControl1.TextBox4.Text <> "" And Me.UserControl1.TextBox5.Text <> "" And Me.UserControl1.TextBox6.Text <> "" And Me.UserControl1.TextBox7.Text <> "" Then
+            If Me.UserControl1.TextBox1.Text <> "" And Me.UserControl1.TextBox2.Text <> "" And Me.UserControl1.TextBox3.Text <> "" And Me.UserControl1.TextBox4.Text <> "" And Me.UserControl1.TextBox5.Text <> "" And Me.UserControl1.TextBox6.Text <> "" And Me.UserControl1.TextBox7.Text <> "" Then
 
-            Me.CheckBox1.Checked = True
-
-            'End If
+                Me.CheckBox1.Checked = True
+                MsgBox("転送を開始しました。")
+                Console.WriteLine("転送開始")
+            End If
         Else
             Dim result As DialogResult = MessageBox.Show("FAX転送を停止しますか？", "確認メッセージ", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2)
             If result = DialogResult.OK Then
@@ -61,7 +63,7 @@ Public Class Form1
 
                     Me.CheckBox1.Checked = False
                     MsgBox("転送を停止しました。")
-
+                    Console.WriteLine("転送停止")
                 Else
                     MsgBox("パスワードが違います！")
                 End If
@@ -70,7 +72,7 @@ Public Class Form1
 
 
         End If
-                ONOFF切り替え()
+        ONOFF切り替え()
 
     End Sub
 
@@ -94,7 +96,8 @@ Public Class Form1
             Me.UserControl1.TextBox5.ReadOnly = True
             Me.UserControl1.TextBox6.ReadOnly = True
             Me.UserControl1.TextBox7.ReadOnly = True
-            'Timer1.Enabled = True
+
+            Timer1.Enabled = True
 
         Else
             lblステータス.Text = "停止中"
@@ -106,7 +109,8 @@ Public Class Form1
             Me.UserControl1.TextBox5.ReadOnly = False
             Me.UserControl1.TextBox6.ReadOnly = False
             Me.UserControl1.TextBox7.ReadOnly = False
-            'Timer1.Enabled = False
+
+            Timer1.Enabled = False
 
         End If
 
@@ -120,16 +124,20 @@ Public Class Form1
                            Dim di1 As New System.IO.DirectoryInfo(kannsi1)
                            Dim files1 As System.IO.FileInfo() = di1.GetFiles("*", System.IO.SearchOption.AllDirectories)
 
-                           For Each f1 As System.IO.FileInfo In files1
-                               転送処理1(f1.FullName)
-                           Next
-
                            '転送2
                            Dim di2 As New System.IO.DirectoryInfo(kannsi2)
                            Dim files2 As System.IO.FileInfo() = di2.GetFiles("*", System.IO.SearchOption.AllDirectories)
 
+                           System.Threading.Thread.Sleep(300)
+
+                           For Each f1 As System.IO.FileInfo In files1
+                               転送処理1(f1.FullName)
+                               Console.WriteLine(f1.FullName)
+                           Next
+
                            For Each f2 As System.IO.FileInfo In files2
                                転送処理2(f2.FullName)
+                               Console.WriteLine(f2.FullName)
                            Next
                        End Sub)
 
@@ -137,7 +145,6 @@ Public Class Form1
 
     Private Sub 転送処理1(ByVal s As String)
 
-        'MsgBox(s)'フルパス
         'Fax受信　⇒　ThereforDATA
 
         Dim fname As String = Path.GetFileNameWithoutExtension(s) 'ファイル名
@@ -321,30 +328,7 @@ Public Class Form1
 
 
                         '-----------------------------------------------------------------------------------------ファイルのコピー処理
-                        ファイル転送("転送1", "", s, saki1 & "\" & fname)
-
-                        'Try 
-                        'If FileOpenCheck(s) = True Then
-                        'System.IO.File.Copy(s, saki1 & "\" & fname, True)
-                        'Else
-                        '   flg = False
-                        'errorstr = "転送タイムアウト"
-                        'End If
-                        '   Catch ex As System.IO.FileNotFoundException 'コピーする元ファイルがない場合
-                        '  flg = False
-                        ' errorstr = ex.Message
-                        'Catch ex As System.IO.DirectoryNotFoundException 'コピー先のファルダが存在しない
-                        'flg = False
-                        'errorstr = ex.Message
-                        'Catch ex As System.IO.IOException 'コピー先のファイルがすでに存在している場合
-                        'flg = False
-                        'errorstr = ex.Message
-                        'Catch ex As System.UnauthorizedAccessException 'コピー先のファイルへのアクセスが拒否された場合
-                        'flg = False
-                        'errorstr = ex.Message
-                        'End Try
-
-                        'MsgBox(fname)
+                        ファイル転送("転送1", "正常", s, saki1 & "\" & fname)
 
 
 
@@ -400,16 +384,8 @@ Public Class Form1
 
                 ファイル転送("転送1", errorstr, s, moto1 & "\" & fname)
 
-                'If FileOpenCheck(s) = True Then
-                'System.IO.File.Copy(s, moto1 & "\" & fname, False) 'エラーコードを付けて転送元へ返信
-                'End If
 
             End If
-
-            'If FileOpenCheck(s) = True Then
-            'System.IO.File.Delete(s) '作業ファイル削除
-            'End If
-
 
 
         End If '拡張子".tmp"をはじく
@@ -419,7 +395,6 @@ Public Class Form1
 
     Private Sub 転送処理2(ByVal s As String)
 
-        'MsgBox(s)'フルパス
         'scan ⇒　FAX受信
 
         Dim fname As String = Path.GetFileNameWithoutExtension(s)
@@ -434,14 +409,8 @@ Public Class Form1
                 fname = "取込__" & Format(Now(), "yyyymmddhhmmss") & kakutyousi
             End If
 
-            ファイル転送("転送2", "", s, saki2 & "\" & fname)
+            ファイル転送("転送2", "正常", s, saki2 & "\" & fname)
 
-            'If FileOpenCheck(s) = True Then
-            'System.IO.File.Copy(s, saki2 & "\" & fname, False)
-            'End If
-            'If FileOpenCheck(s) = True Then
-            'System.IO.File.Delete(s)
-            'End If
 
         End If '拡張子".tmp"をはじく
 
@@ -465,9 +434,9 @@ Public Class Form1
 
         Try '-----------------------------------------------------------------------------------------ファイルの削除処理
             If FileOpenCheck(a) = True Then
-                System.IO.File.Copy(a, b, True)
+                System.IO.File.Delete(a)
             End If
-        Catch ex As System.UnauthorizedAccessException '------コ削除ファイルへのアクセスが拒否された場合
+        Catch ex As System.UnauthorizedAccessException '------削除ファイルへのアクセスが拒否された場合
             System.Console.WriteLine(ex.Message)
         Catch ex As System.Exception '------------------------すべての例外
             System.Console.WriteLine(ex.Message)
@@ -518,8 +487,8 @@ Public Class Form1
     End Sub
 
     Private Sub ログ保存(ByVal syori As String, ByVal kekka As String, ByVal oname As String, ByVal nname As String)
-
-        Dim sqlstr As String = ""
+        Dim dt As Date = DateTime.Now
+        Dim sqlstr As String = "INSERT INTO T_TF_D_FileTransferLog (処理, 結果, 変更前ファイル名, 変更後ファイル名, 日時) values ('" & syori & "', '" & kekka & "', '" & oname & "', '" & nname & "', '" & dt & "')"
 
         Dim cn As SqlClient.SqlConnection
         Dim cmd As SqlClient.SqlCommand
@@ -538,6 +507,24 @@ Public Class Form1
 
     End Sub
 
+    Private Sub ログ取得()
+
+        Dim cn As New SqlClient.SqlConnection(cnstr)
+        cn.Open()
+
+        Dim da = New SqlDataAdapter("SELECT TOP (100) ID, 処理, 結果, 変更前ファイル名, 変更後ファイル名, 日時 FROM dbo.T_TF_D_FileTransferLog ORDER BY ID DESC", cn)
+
+        Dim ds As New DataSet()
+
+        da.Fill(ds)
+
+        DataGridView1.DataSource = ds.Tables(0)
+
+        cn.Close()
+        cn.Dispose()
+
+    End Sub
+
     Private Function FileOpenCheck(fpath As String) As Boolean
 
         Dim st As Stream = Nothing
@@ -547,7 +534,7 @@ Public Class Form1
 
         For i = 0 To maxcount
             Try
-                st = File.Open(fpath, FileMode.Open, FileAccess.Read, FileShare.None)
+                st = File.Open(fpath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
                 If Not st Is Nothing Then
                     'Console.WriteLine(c)
                     Exit For
@@ -570,6 +557,8 @@ Public Class Form1
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        ログ取得()
+        TextBox1.Text = ""
         Me.UserControl1.Visible = False
         Me.UserControl2.Visible = False
         Me.UserControl2.Dock = DockStyle.Fill
@@ -586,19 +575,18 @@ Public Class Form1
     End Sub
 
     Private Sub DataGridSetting()
-        Dim dgv As DataGridView = Me.DataGridView1
 
-        dgv.Columns(0).Width = 60
+        DataGridView1.Sort(DataGridView1.Columns(0), System.ComponentModel.ListSortDirection.Descending)
+
+    End Sub
+
+    Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
+        TextBox1.Text = DataGridView1.CurrentCell.Value
+    End Sub
+
+    Private Sub btnテスト_Click(sender As Object, e As EventArgs) Handles btnテスト.Click
 
 
-        dgv.Columns(1).Width = 60
-
-
-        dgv.Columns(2).Width = 600
-
-
-
-        dgv.Columns(3).Width = 200
 
     End Sub
 
@@ -606,6 +594,7 @@ Public Class Form1
 
 
 End Class
+
 
 
 Public Class SettingItemClass
@@ -645,23 +634,28 @@ Class SettingClass
 
     Public Shared Sub 設定読込()
 
-        Dim strPath As String = System.Reflection.Assembly.GetExecutingAssembly().Location
-        strPath = System.IO.Path.GetDirectoryName(strPath)
-        strPath = strPath & "\setting.xml"
+        Try
+            Dim strPath As String = System.Reflection.Assembly.GetExecutingAssembly().Location
+            strPath = System.IO.Path.GetDirectoryName(strPath)
+            strPath = strPath & "\setting.xml"
 
-        Dim serializer As New System.Xml.Serialization.XmlSerializer(GetType(SettingItemClass))
-        Dim sr As New System.IO.StreamReader(strPath, New System.Text.UTF8Encoding(False))
-        Dim obj As SettingItemClass = DirectCast(serializer.Deserialize(sr), SettingItemClass)
+            Dim serializer As New System.Xml.Serialization.XmlSerializer(GetType(SettingItemClass))
+            Dim sr As New System.IO.StreamReader(strPath, New System.Text.UTF8Encoding(False))
+            Dim obj As SettingItemClass = DirectCast(serializer.Deserialize(sr), SettingItemClass)
 
-        Form1.UserControl1.TextBox1.Text = obj.kannsi1
-        Form1.UserControl1.TextBox2.Text = obj.saki1
-        Form1.UserControl1.TextBox3.Text = obj.moto1
-        Form1.UserControl1.TextBox4.Text = obj.kannsi2
-        Form1.UserControl1.TextBox5.Text = obj.saki2
-        Form1.UserControl1.TextBox6.Text = obj.moto2
-        Form1.UserControl1.TextBox7.Text = obj.interval
+            Form1.UserControl1.TextBox1.Text = obj.kannsi1
+            Form1.UserControl1.TextBox2.Text = obj.saki1
+            Form1.UserControl1.TextBox3.Text = obj.moto1
+            Form1.UserControl1.TextBox4.Text = obj.kannsi2
+            Form1.UserControl1.TextBox5.Text = obj.saki2
+            Form1.UserControl1.TextBox6.Text = obj.moto2
+            Form1.UserControl1.TextBox7.Text = obj.interval
 
-        sr.Close()
+            sr.Close()
+
+        Catch ex As System.Exception '------------------------すべての例外
+            System.Console.WriteLine(ex.Message)
+        End Try
 
     End Sub
 
