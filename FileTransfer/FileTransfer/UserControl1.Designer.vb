@@ -45,6 +45,10 @@ Partial Class UserControl1
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
+        Me.Button7 = New System.Windows.Forms.Button()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.TextBox8 = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
         'Label3
@@ -240,11 +244,49 @@ Partial Class UserControl1
         Me.Label10.TabIndex = 26
         Me.Label10.Text = "ミリ秒"
         '
+        'Button7
+        '
+        Me.Button7.Location = New System.Drawing.Point(781, 38)
+        Me.Button7.Name = "Button7"
+        Me.Button7.Size = New System.Drawing.Size(75, 23)
+        Me.Button7.TabIndex = 27
+        Me.Button7.Text = "DB設定"
+        Me.Button7.UseVisualStyleBackColor = True
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(632, 43)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(17, 12)
+        Me.Label11.TabIndex = 30
+        Me.Label11.Text = "件"
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(453, 43)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(71, 12)
+        Me.Label12.TabIndex = 29
+        Me.Label12.Text = "ログ取得件数"
+        '
+        'TextBox8
+        '
+        Me.TextBox8.Location = New System.Drawing.Point(553, 40)
+        Me.TextBox8.Name = "TextBox8"
+        Me.TextBox8.Size = New System.Drawing.Size(64, 19)
+        Me.TextBox8.TabIndex = 28
+        '
         'UserControl1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.Highlight
+        Me.Controls.Add(Me.Label11)
+        Me.Controls.Add(Me.Label12)
+        Me.Controls.Add(Me.TextBox8)
+        Me.Controls.Add(Me.Button7)
         Me.Controls.Add(Me.Label10)
         Me.Controls.Add(Me.Label9)
         Me.Controls.Add(Me.Label8)
@@ -298,4 +340,8 @@ Partial Class UserControl1
     Friend WithEvents Label8 As Label
     Friend WithEvents Label9 As Label
     Friend WithEvents Label10 As Label
+    Friend WithEvents Button7 As Button
+    Friend WithEvents Label11 As Label
+    Friend WithEvents Label12 As Label
+    Friend WithEvents TextBox8 As TextBox
 End Class

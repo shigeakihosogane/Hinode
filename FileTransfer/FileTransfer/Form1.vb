@@ -1,11 +1,15 @@
-﻿Imports System.Data.SqlClient
+﻿Imports System.Configuration
+Imports System.Data.SqlClient
 Imports System.Globalization
 Imports System.IO
 
 Public Class Form1
 
     'DBの接続文字列
-    Dim cnstr As String = "Data Source=SV201710;Initial Catalog=HINODEDB;USER ID=sa;PASSWORD=cube%6614;"
+    Dim connectionkey As String = "FileTransfer.My.MySettings.HINODEDBConnectionString"
+    Dim settings As ConnectionStringSettings = ConfigurationManager.ConnectionStrings(connectionkey)
+    Dim cnstr As String = settings.ConnectionString
+
 
     '転送1
     'Fax受信⇒ThereforDATA　（Therefor上にアップロードするリネーム処理）
@@ -28,6 +32,7 @@ Public Class Form1
 
         SettingClass.設定読込()
         DataGridSetting()
+        Me.UserControl2.TextBox1.Text = cnstr
 
         Me.UserControl1.Visible = False
         Me.UserControl2.Visible = False
@@ -96,6 +101,10 @@ Public Class Form1
             Me.UserControl1.TextBox5.ReadOnly = True
             Me.UserControl1.TextBox6.ReadOnly = True
             Me.UserControl1.TextBox7.ReadOnly = True
+            Me.UserControl1.TextBox8.ReadOnly = True
+            Me.UserControl2.TextBox1.ReadOnly = True
+            Me.UserControl1.Visible = False
+            Me.UserControl2.Visible = False
 
             Timer1.Enabled = True
 
@@ -109,11 +118,12 @@ Public Class Form1
             Me.UserControl1.TextBox5.ReadOnly = False
             Me.UserControl1.TextBox6.ReadOnly = False
             Me.UserControl1.TextBox7.ReadOnly = False
+            Me.UserControl1.TextBox8.ReadOnly = False
+            Me.UserControl2.TextBox1.ReadOnly = False
 
             Timer1.Enabled = False
 
         End If
-
 
     End Sub
 
@@ -140,6 +150,9 @@ Public Class Form1
                                Console.WriteLine(f2.FullName)
                            Next
                        End Sub)
+        If CheckBox2.Checked = True Then
+            ログ取得(UserControl1.TextBox8.Text)
+        End If
 
     End Sub
 
@@ -191,20 +204,27 @@ Public Class Form1
 
                 If reader.HasRows = True Then '---レコードあり
 
-                    Do While reader.Read()
-                        If reader("開始日") IsNot DBNull.Value Then
-                            sdate = Format(reader("開始日"), "yyyymmdd")
-                        End If
-                        If reader("終了日") IsNot DBNull.Value Then
-                            edate = Format(reader("終了日"), "yyyymmdd")
-                        End If
-                        busyo = reader("担当部署")
-                        bikou = reader("備考")
-                        ninusiID = reader("荷主ID")
-                        ninusimeiHND = reader("名称_HND")
-                        ninusimeiTF = reader("名称_TF")
-                        FAXbanngou = reader("FAX番号")
-                    Loop
+                    Try
+
+                        Do While reader.Read()
+                            If reader("開始日") IsNot DBNull.Value Then
+                                sdate = Format(reader("開始日"), "yyyymmdd")
+                            End If
+                            If reader("終了日") IsNot DBNull.Value Then
+                                edate = Format(reader("終了日"), "yyyymmdd")
+                            End If
+                            busyo = reader("担当部署")
+                            bikou = reader("備考")
+                            ninusiID = reader("荷主ID")
+                            ninusimeiHND = reader("名称_HND")
+                            ninusimeiTF = reader("名称_TF")
+                            FAXbanngou = reader("FAX番号")
+                        Loop
+
+                    Catch ex As System.Exception '------------------------すべての例外
+                        System.Console.WriteLine(ex.Message)
+                    End Try
+
 
                     reader.Close()
                     cmd.Dispose()
@@ -487,6 +507,7 @@ Public Class Form1
     End Sub
 
     Private Sub ログ保存(ByVal syori As String, ByVal kekka As String, ByVal oname As String, ByVal nname As String)
+
         Dim dt As Date = DateTime.Now
         Dim sqlstr As String = "INSERT INTO T_TF_D_FileTransferLog (処理, 結果, 変更前ファイル名, 変更後ファイル名, 日時) values ('" & syori & "', '" & kekka & "', '" & oname & "', '" & nname & "', '" & dt & "')"
 
@@ -507,12 +528,12 @@ Public Class Form1
 
     End Sub
 
-    Private Sub ログ取得()
+    Private Sub ログ取得(c As Integer)
 
         Dim cn As New SqlClient.SqlConnection(cnstr)
         cn.Open()
 
-        Dim da = New SqlDataAdapter("SELECT TOP (100) ID, 処理, 結果, 変更前ファイル名, 変更後ファイル名, 日時 FROM dbo.T_TF_D_FileTransferLog ORDER BY ID DESC", cn)
+        Dim da = New SqlDataAdapter("SELECT TOP (" & c & ") ID, 処理, 結果, 変更前ファイル名, 変更後ファイル名, 日時 FROM dbo.T_TF_D_FileTransferLog ORDER BY ID DESC", cn)
 
         Dim ds As New DataSet()
 
@@ -557,7 +578,7 @@ Public Class Form1
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        ログ取得()
+        ログ取得(UserControl1.TextBox8.Text)
         TextBox1.Text = ""
         Me.UserControl1.Visible = False
         Me.UserControl2.Visible = False
@@ -582,7 +603,29 @@ Public Class Form1
 
     Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
         TextBox1.Text = DataGridView1.CurrentCell.Value
+        CheckBox2.Checked = False
     End Sub
+
+    Public Function 接続テスト(s As String) As Boolean
+
+        Try
+            Dim cn As New SqlConnection
+            Using cn
+
+                cn.ConnectionString = s
+                cn.Open()
+
+                MessageBox.Show(cn.State.ToString, "DB接続テスト")
+                接続テスト = cn.State
+
+            End Using
+
+        Catch ex As Exception
+            MessageBox.Show(ex.ToString, "接続テスト【例外発生】")
+            接続テスト = False
+        End Try
+
+    End Function
 
     Private Sub btnテスト_Click(sender As Object, e As EventArgs) Handles btnテスト.Click
 
@@ -590,10 +633,12 @@ Public Class Form1
 
     End Sub
 
-
-
-
 End Class
+
+
+
+
+
 
 
 
@@ -605,6 +650,7 @@ Public Class SettingItemClass
     Public saki2 As String
     Public moto2 As String
     Public interval As String
+    Public logc As String
 End Class
 
 Class SettingClass
@@ -623,6 +669,7 @@ Class SettingClass
         obj.saki2 = Form1.UserControl1.TextBox5.Text
         obj.moto2 = Form1.UserControl1.TextBox6.Text
         obj.interval = Form1.UserControl1.TextBox7.Text
+        obj.logc = Form1.UserControl1.TextBox8.Text
 
         Dim serializer As New System.Xml.Serialization.XmlSerializer(GetType(SettingItemClass))
         Dim sw As New System.IO.StreamWriter(strPath, False, New System.Text.UTF8Encoding(False))
@@ -650,6 +697,7 @@ Class SettingClass
             Form1.UserControl1.TextBox5.Text = obj.saki2
             Form1.UserControl1.TextBox6.Text = obj.moto2
             Form1.UserControl1.TextBox7.Text = obj.interval
+            Form1.UserControl1.TextBox8.Text = obj.logc
 
             sr.Close()
 
@@ -661,4 +709,3 @@ Class SettingClass
 
 
 End Class
-

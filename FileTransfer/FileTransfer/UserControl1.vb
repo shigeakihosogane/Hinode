@@ -45,4 +45,25 @@
 
     End Sub
 
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+
+        If Form1.CheckBox1.Checked = False Then
+            Dim inputText As String
+            inputText = InputBox("パスワードを入力してください。", "確認メッセージ", "", Me.Left + 300, Me.Top + 200)
+            If inputText = "Hinode8739" Then
+                Form1.UserControl2.Visible = True
+                Form1.UserControl2.Dock = DockStyle.Fill
+            Else
+                MsgBox("パスワードが違います！")
+            End If
+
+        Else
+            MsgBox("稼働中は設定変更できません。")
+        End If
+
+    End Sub
+
+    Private Sub Label11_Click(sender As Object, e As EventArgs) Handles Label11.Click
+
+    End Sub
 End Class

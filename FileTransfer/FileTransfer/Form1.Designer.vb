@@ -33,7 +33,8 @@ Partial Class Form1
         Me.Button3 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.Panel2 = New System.Windows.Forms.Panel()
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.UserControl2 = New FileTransfer.UserControl2()
+        Me.UserControl1 = New FileTransfer.UserControl1()
         Me.DataGridView1 = New System.Windows.Forms.DataGridView()
         Me.IDDataGridViewTextBoxColumn = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.処理DataGridViewTextBoxColumn = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -43,9 +44,9 @@ Partial Class Form1
         Me.日時DataGridViewTextBoxColumn = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.TTFDFileTransferLogBindingSource = New System.Windows.Forms.BindingSource(Me.components)
         Me.HINODEDBDataSet = New FileTransfer.HINODEDBDataSet()
+        Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.T_TF_D_FileTransferLogTableAdapter = New FileTransfer.HINODEDBDataSetTableAdapters.T_TF_D_FileTransferLogTableAdapter()
-        Me.UserControl2 = New FileTransfer.UserControl2()
-        Me.UserControl1 = New FileTransfer.UserControl1()
+        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
         Me.Panel1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -78,7 +79,7 @@ Partial Class Form1
         '
         Me.CheckBox1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.CheckBox1.AutoSize = True
-        Me.CheckBox1.Location = New System.Drawing.Point(866, 34)
+        Me.CheckBox1.Location = New System.Drawing.Point(743, 34)
         Me.CheckBox1.Name = "CheckBox1"
         Me.CheckBox1.Size = New System.Drawing.Size(15, 14)
         Me.CheckBox1.TabIndex = 22
@@ -91,6 +92,7 @@ Partial Class Form1
         '
         'Panel1
         '
+        Me.Panel1.Controls.Add(Me.CheckBox2)
         Me.Panel1.Controls.Add(Me.btnテスト)
         Me.Panel1.Controls.Add(Me.Button3)
         Me.Panel1.Controls.Add(Me.Button2)
@@ -107,7 +109,7 @@ Partial Class Form1
         '
         Me.btnテスト.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnテスト.Cursor = System.Windows.Forms.Cursors.SizeAll
-        Me.btnテスト.Location = New System.Drawing.Point(635, 34)
+        Me.btnテスト.Location = New System.Drawing.Point(636, 31)
         Me.btnテスト.Name = "btnテスト"
         Me.btnテスト.Size = New System.Drawing.Size(83, 19)
         Me.btnテスト.TabIndex = 25
@@ -119,7 +121,7 @@ Partial Class Form1
         '
         Me.Button3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Button3.Cursor = System.Windows.Forms.Cursors.SizeAll
-        Me.Button3.Location = New System.Drawing.Point(866, 72)
+        Me.Button3.Location = New System.Drawing.Point(866, 31)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(83, 19)
         Me.Button3.TabIndex = 24
@@ -139,22 +141,31 @@ Partial Class Form1
         '
         'Panel2
         '
-        Me.Panel2.Controls.Add(Me.TextBox1)
         Me.Panel2.Controls.Add(Me.UserControl2)
         Me.Panel2.Controls.Add(Me.UserControl1)
         Me.Panel2.Controls.Add(Me.DataGridView1)
+        Me.Panel2.Controls.Add(Me.TextBox1)
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel2.Location = New System.Drawing.Point(0, 107)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(986, 406)
         Me.Panel2.TabIndex = 24
         '
-        'TextBox1
+        'UserControl2
         '
-        Me.TextBox1.Location = New System.Drawing.Point(5, 375)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(976, 19)
-        Me.TextBox1.TabIndex = 3
+        Me.UserControl2.BackColor = System.Drawing.Color.OrangeRed
+        Me.UserControl2.Location = New System.Drawing.Point(12, 20)
+        Me.UserControl2.Name = "UserControl2"
+        Me.UserControl2.Size = New System.Drawing.Size(15, 362)
+        Me.UserControl2.TabIndex = 1
+        '
+        'UserControl1
+        '
+        Me.UserControl1.BackColor = System.Drawing.SystemColors.Highlight
+        Me.UserControl1.Location = New System.Drawing.Point(958, 20)
+        Me.UserControl1.Name = "UserControl1"
+        Me.UserControl1.Size = New System.Drawing.Size(16, 362)
+        Me.UserControl1.TabIndex = 0
         '
         'DataGridView1
         '
@@ -233,25 +244,26 @@ Partial Class Form1
         Me.HINODEDBDataSet.DataSetName = "HINODEDBDataSet"
         Me.HINODEDBDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema
         '
+        'TextBox1
+        '
+        Me.TextBox1.Location = New System.Drawing.Point(5, 375)
+        Me.TextBox1.Name = "TextBox1"
+        Me.TextBox1.Size = New System.Drawing.Size(976, 19)
+        Me.TextBox1.TabIndex = 3
+        '
         'T_TF_D_FileTransferLogTableAdapter
         '
         Me.T_TF_D_FileTransferLogTableAdapter.ClearBeforeFill = True
         '
-        'UserControl2
+        'CheckBox2
         '
-        Me.UserControl2.BackColor = System.Drawing.Color.OrangeRed
-        Me.UserControl2.Location = New System.Drawing.Point(12, 20)
-        Me.UserControl2.Name = "UserControl2"
-        Me.UserControl2.Size = New System.Drawing.Size(15, 362)
-        Me.UserControl2.TabIndex = 1
-        '
-        'UserControl1
-        '
-        Me.UserControl1.BackColor = System.Drawing.SystemColors.Highlight
-        Me.UserControl1.Location = New System.Drawing.Point(958, 20)
-        Me.UserControl1.Name = "UserControl1"
-        Me.UserControl1.Size = New System.Drawing.Size(16, 362)
-        Me.UserControl1.TabIndex = 0
+        Me.CheckBox2.AutoSize = True
+        Me.CheckBox2.Location = New System.Drawing.Point(866, 74)
+        Me.CheckBox2.Name = "CheckBox2"
+        Me.CheckBox2.Size = New System.Drawing.Size(72, 16)
+        Me.CheckBox2.TabIndex = 26
+        Me.CheckBox2.Text = "自動更新"
+        Me.CheckBox2.UseVisualStyleBackColor = True
         '
         'Form1
         '
@@ -295,4 +307,5 @@ Partial Class Form1
     Friend WithEvents 日時DataGridViewTextBoxColumn As DataGridViewTextBoxColumn
     Friend WithEvents btnテスト As Button
     Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents CheckBox2 As CheckBox
 End Class
