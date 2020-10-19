@@ -256,7 +256,7 @@ Partial Class UserControl1
         'Label11
         '
         Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(632, 43)
+        Me.Label11.Location = New System.Drawing.Point(555, 43)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(17, 12)
         Me.Label11.TabIndex = 30
@@ -265,7 +265,7 @@ Partial Class UserControl1
         'Label12
         '
         Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(453, 43)
+        Me.Label12.Location = New System.Drawing.Point(408, 43)
         Me.Label12.Name = "Label12"
         Me.Label12.Size = New System.Drawing.Size(71, 12)
         Me.Label12.TabIndex = 29
@@ -273,7 +273,7 @@ Partial Class UserControl1
         '
         'TextBox8
         '
-        Me.TextBox8.Location = New System.Drawing.Point(553, 40)
+        Me.TextBox8.Location = New System.Drawing.Point(485, 40)
         Me.TextBox8.Name = "TextBox8"
         Me.TextBox8.Size = New System.Drawing.Size(64, 19)
         Me.TextBox8.TabIndex = 28

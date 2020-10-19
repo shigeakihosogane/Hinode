@@ -151,7 +151,8 @@ Public Class Form1
                            Next
                        End Sub)
         If CheckBox2.Checked = True Then
-            ログ取得(UserControl1.TextBox8.Text)
+            Dim c As Integer = CInt(UserControl1.TextBox8.Text)
+            ログ取得(c)
         End If
 
     End Sub
@@ -578,7 +579,8 @@ Public Class Form1
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        ログ取得(UserControl1.TextBox8.Text)
+        Dim c As Integer = CInt(UserControl1.TextBox8.Text)
+        ログ取得(c)
         TextBox1.Text = ""
         Me.UserControl1.Visible = False
         Me.UserControl2.Visible = False
