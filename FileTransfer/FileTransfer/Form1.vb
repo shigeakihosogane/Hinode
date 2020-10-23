@@ -53,12 +53,23 @@ Public Class Form1
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click 'ON/OFF切り替え
 
         If Me.CheckBox1.Checked = False Then
-            If Me.UserControl1.TextBox1.Text <> "" And Me.UserControl1.TextBox2.Text <> "" And Me.UserControl1.TextBox3.Text <> "" And Me.UserControl1.TextBox4.Text <> "" And Me.UserControl1.TextBox5.Text <> "" And Me.UserControl1.TextBox6.Text <> "" And Me.UserControl1.TextBox7.Text <> "" Then
 
-                Me.CheckBox1.Checked = True
-                MsgBox("転送を開始しました。")
-                Console.WriteLine("転送開始")
+            'If Me.UserControl1.TextBox1.Text <> "" And Me.UserControl1.TextBox2.Text <> "" And Me.UserControl1.TextBox3.Text <> "" And Me.UserControl1.TextBox4.Text <> "" And Me.UserControl1.TextBox5.Text <> "" And Me.UserControl1.TextBox6.Text <> "" And Me.UserControl1.TextBox7.Text <> "" Then
+            If Directory.Exists(Me.UserControl1.TextBox1.Text) And Directory.Exists(Me.UserControl1.TextBox2.Text) And Directory.Exists(Me.UserControl1.TextBox3.Text) And Directory.Exists(Me.UserControl1.TextBox4.Text) And Directory.Exists(Me.UserControl1.TextBox5.Text) And Directory.Exists(Me.UserControl1.TextBox6.Text) Then
+
+                If IsNumeric(Me.UserControl1.TextBox7.Text) And IsNumeric(Me.UserControl1.TextBox8.Text) Then
+
+                    Me.CheckBox1.Checked = True
+                    MsgBox("転送を開始しました。")
+                    Console.WriteLine("転送開始")
+
+                Else
+                    MsgBox("監視インターバルとログ取得件数を正しく入力してください。")
+                End If
+            Else
+                MsgBox("ファルダ選択エラー")
             End If
+
         Else
             Dim result As DialogResult = MessageBox.Show("FAX転送を停止しますか？", "確認メッセージ", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2)
             If result = DialogResult.OK Then
@@ -93,7 +104,11 @@ Public Class Form1
             kannsi2 = Me.UserControl1.TextBox4.Text
             saki2 = Me.UserControl1.TextBox5.Text
             moto2 = Me.UserControl1.TextBox6.Text
-            interval = Me.UserControl1.TextBox7.Text
+            Try
+                interval = CInt(Me.UserControl1.TextBox7.Text) * 1000
+            Catch ex As System.Exception
+                interval = 1000
+            End Try
             Me.UserControl1.TextBox1.ReadOnly = True
             Me.UserControl1.TextBox2.ReadOnly = True
             Me.UserControl1.TextBox3.ReadOnly = True
@@ -106,6 +121,7 @@ Public Class Form1
             Me.UserControl1.Visible = False
             Me.UserControl2.Visible = False
 
+            Timer1.Interval = interval
             Timer1.Enabled = True
 
         Else
@@ -151,7 +167,12 @@ Public Class Form1
                            Next
                        End Sub)
         If CheckBox2.Checked = True Then
-            Dim c As Integer = CInt(UserControl1.TextBox8.Text)
+            Dim c As Integer
+            Try
+                c = CInt(UserControl1.TextBox8.Text)
+            Catch ex As System.Exception
+                c = 100
+            End Try
             ログ取得(c)
         End If
 
@@ -209,10 +230,10 @@ Public Class Form1
 
                         Do While reader.Read()
                             If reader("開始日") IsNot DBNull.Value Then
-                                sdate = Format(reader("開始日"), "yyyymmdd")
+                                sdate = Format(reader("開始日"), "yyyyMMdd")
                             End If
                             If reader("終了日") IsNot DBNull.Value Then
-                                edate = Format(reader("終了日"), "yyyymmdd")
+                                edate = Format(reader("終了日"), "yyyyMMdd")
                             End If
                             busyo = reader("担当部署")
                             bikou = reader("備考")
@@ -427,7 +448,7 @@ Public Class Form1
             If DateTime.TryParseExact(fname, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
                 fname = "scan__" & fname & kakutyousi
             Else
-                fname = "取込__" & Format(Now(), "yyyymmddhhmmss") & kakutyousi
+                fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & kakutyousi
             End If
 
             ファイル転送("転送2", "正常", s, saki2 & "\" & fname)
@@ -579,7 +600,12 @@ Public Class Form1
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        Dim c As Integer = CInt(UserControl1.TextBox8.Text)
+        Dim c As Integer
+        Try
+            c = CInt(UserControl1.TextBox8.Text)
+        Catch ex As System.Exception
+            c = 100
+        End Try
         ログ取得(c)
         TextBox1.Text = ""
         Me.UserControl1.Visible = False

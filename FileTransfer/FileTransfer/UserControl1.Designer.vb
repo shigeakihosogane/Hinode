@@ -238,11 +238,11 @@ Partial Class UserControl1
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(225, 43)
+        Me.Label10.Location = New System.Drawing.Point(216, 43)
         Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(31, 12)
+        Me.Label10.Size = New System.Drawing.Size(29, 12)
         Me.Label10.TabIndex = 26
-        Me.Label10.Text = "ミリ秒"
+        Me.Label10.Text = "秒毎"
         '
         'Button7
         '

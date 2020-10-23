@@ -29,6 +29,7 @@ Partial Class Form1
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
         Me.btnテスト = New System.Windows.Forms.Button()
         Me.Button3 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
@@ -46,7 +47,6 @@ Partial Class Form1
         Me.HINODEDBDataSet = New FileTransfer.HINODEDBDataSet()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.T_TF_D_FileTransferLogTableAdapter = New FileTransfer.HINODEDBDataSetTableAdapters.T_TF_D_FileTransferLogTableAdapter()
-        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
         Me.Panel1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -104,6 +104,16 @@ Partial Class Form1
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(986, 107)
         Me.Panel1.TabIndex = 23
+        '
+        'CheckBox2
+        '
+        Me.CheckBox2.AutoSize = True
+        Me.CheckBox2.Location = New System.Drawing.Point(866, 74)
+        Me.CheckBox2.Name = "CheckBox2"
+        Me.CheckBox2.Size = New System.Drawing.Size(72, 16)
+        Me.CheckBox2.TabIndex = 26
+        Me.CheckBox2.Text = "自動更新"
+        Me.CheckBox2.UseVisualStyleBackColor = True
         '
         'btnテスト
         '
@@ -254,16 +264,6 @@ Partial Class Form1
         'T_TF_D_FileTransferLogTableAdapter
         '
         Me.T_TF_D_FileTransferLogTableAdapter.ClearBeforeFill = True
-        '
-        'CheckBox2
-        '
-        Me.CheckBox2.AutoSize = True
-        Me.CheckBox2.Location = New System.Drawing.Point(866, 74)
-        Me.CheckBox2.Name = "CheckBox2"
-        Me.CheckBox2.Size = New System.Drawing.Size(72, 16)
-        Me.CheckBox2.TabIndex = 26
-        Me.CheckBox2.Text = "自動更新"
-        Me.CheckBox2.UseVisualStyleBackColor = True
         '
         'Form1
         '
