@@ -325,7 +325,7 @@ Public Class Form1
 
                         Else '-----------------------------------------------------------------------------------------------------------------通常受注処理
 
-                            fname = ninusimeiHND
+                            fname = ninusimeiHND '受注のFAXについては荷主名を強制的に上書きする
 
                             If fnarray(1) = "登録名称不明" Or fnarray(1) = "scan" Or fnarray(1) = "取込" Or fnarray(1) = "" Then '荷主名
                             Else
