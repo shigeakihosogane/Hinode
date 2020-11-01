@@ -257,17 +257,16 @@ Public Class Form1
                     Dim TSiti As Integer
                     Dim dt As Date
                     For TSiti = 0 To yousosuu - 1
-                        If DateTime.TryParseExact(fnarray(TSiti), "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
+                        If DateTime.TryParseExact(Strings.Left(fnarray(TSiti), 14), "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
                             Exit For
                         Else
                             'MsgBox(i & " " & fnarray(i))
                         End If
                     Next
 
-                    If yousosuu >= 4 Then '配列の要素数チェック----要素数4以上
+                    If zyutyuuCD = 501 Or zyutyuuCD = 601 Or zyutyuuCD = 701 Or zyutyuuCD = 801 Or zyutyuuCD = 901 Then '------------受注以外の処理（受注CD三桁以下）
 
-                        '###########################################################################################ファイル名組み立て開始
-                        If zyutyuuCD = 501 Or zyutyuuCD = 601 Or zyutyuuCD = 701 Or zyutyuuCD = 801 Or zyutyuuCD = 901 Then '------------受注以外の処理（受注CD三桁以下）
+                        If yousosuu >= 5 And yousosuu <= 6 And TSiti = 4 Then '配列の要素数チェック----要素数5以上、6以下、タイムスタンプ位置4
 
                             Dim str As String = fnarray(1)
                             Dim strarray As Array = Split(str, "-")
@@ -289,7 +288,7 @@ Public Class Form1
                                 bikou = str
                             End If
 
-                            If fnarray(2) = "登録名称不明" Or fnarray(2) = "scan" Or fnarray(2) = "取込" Or fnarray(2) = "" Then '荷主名
+                            If fnarray(2) = "登録名称不明" Or fnarray(2) = "scan" Or fnarray(2) = "取込" Or fnarray(2) = "本社受信" Or fnarray(2) = "" Then '荷主名
                                 If ninusimeiTF = "" Then
                                     fname = ninusimeiHND
                                 Else
@@ -309,7 +308,7 @@ Public Class Form1
                                 fname &= "_" & fnarray(3)
                             End If
 
-                            fname &= "_" & fnarray(4) '-------------------------------------タイムスタンプ
+                            fname &= "_" & Strings.Left(fnarray(4), 14) '-------------------------------------タイムスタンプ
                             fname &= "_" & fnarray(0) '-------------------------------------受注CD
                             fname &= "_" & sdate '------------------------------------------開始日
                             fname &= "_" & edate '------------------------------------------終了日
@@ -322,8 +321,17 @@ Public Class Form1
                             End If
                             fname &= kakutyousi '-------------------------------------------拡張子
 
+                            '-----------------------------------------------------------------------------------------ファイルのコピー処理
+                            ファイル転送("転送1", "正常", s, saki1 & "\" & fname)
 
-                        Else '-----------------------------------------------------------------------------------------------------------------通常受注処理
+                        Else
+                            flg = False
+                            errorstr = "ファイル名不正"
+                        End If
+
+                    Else '-----------------------------------------------------------------------------------------------------------------通常受注処理
+
+                        If yousosuu >= 4 And yousosuu <= 5 And TSiti = 3 Then '配列の要素数チェック----要素数4以上、5以下、タイムスタンプ位置3
 
                             fname = ninusimeiHND '受注のFAXについては荷主名を強制的に上書きする
 
@@ -347,7 +355,7 @@ Public Class Form1
                                 End If
                             End If
 
-                            fname &= "_" & fnarray(3) '-------------------------------------タイムスタンプ
+                            fname &= "_" & Strings.Left(fnarray(3), 14) '-------------------------------------タイムスタンプ
                             fname &= "_" & fnarray(0) '-------------------------------------受注CD
                             fname &= "_" & sdate '------------------------------------------開始日
                             fname &= "_" & edate '------------------------------------------終了日
@@ -360,20 +368,14 @@ Public Class Form1
                             End If
                             fname &= kakutyousi '-------------------------------------------拡張子
 
-
-                        End If
-                            '#############################################################################################ファイル組み立て終了
-
-
-
                             '-----------------------------------------------------------------------------------------ファイルのコピー処理
                             ファイル転送("転送1", "正常", s, saki1 & "\" & fname)
 
+                        Else
+                            flg = False
+                            errorstr = "ファイル名不正"
+                        End If
 
-
-                    Else '----------------------------------------------要素数4未満
-                        flg = False
-                        errorstr = "ファイル名不正"
                     End If
 
                 Else '受注CD適合なし
