@@ -167,8 +167,12 @@ Public Class Form1
                            Next
 
                            For Each f2 As System.IO.FileInfo In files2
-                               転送処理2(f2.FullName)
-                               Console.WriteLine(f2.FullName)
+                               Dim kakutyousi As String = Path.GetExtension(f2.FullName) '拡張子
+                               If kakutyousi = ".tmp" Or kakutyousi = ".db" Then
+                               Else
+                                   転送処理2(f2.FullName)
+                                   Console.WriteLine(f2.FullName)
+                               End If
                            Next
                        End Sub)
         If CheckBox2.Checked = True Then
