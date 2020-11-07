@@ -157,8 +157,13 @@ Public Class Form1
                            System.Threading.Thread.Sleep(300)
 
                            For Each f1 As System.IO.FileInfo In files1
-                               転送処理1(f1.FullName)
-                               Console.WriteLine(f1.FullName)
+
+                               Dim kakutyousi As String = Path.GetExtension(f1.FullName) '拡張子
+                               If kakutyousi = ".tmp" Or kakutyousi = ".db" Then
+                               Else
+                                   転送処理1(f1.FullName)
+                                   Console.WriteLine(f1.FullName)
+                               End If
                            Next
 
                            For Each f2 As System.IO.FileInfo In files2
