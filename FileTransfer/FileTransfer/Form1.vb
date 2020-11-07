@@ -18,7 +18,7 @@ Public Class Form1
     Dim moto1 As String = ""
 
     '転送1
-    'scam⇒Fax受信　（スキャン時のリネーム処理）
+    'scam⇒Fax受信　（スキャン時のリネーム処理）（取込ファイルのファイル名調整）
     Dim kannsi2 As String = ""
     Dim saki2 As String = ""
     Dim moto2 As String = ""
@@ -308,7 +308,7 @@ Public Class Form1
                                 fname &= "_" & fnarray(3)
                             End If
 
-                            fname &= "_" & Strings.Left(fnarray(4), 14) '-------------------------------------タイムスタンプ
+                            fname &= "_" & Strings.Left(fnarray(4), 14) '-------------------タイムスタンプ
                             fname &= "_" & fnarray(0) '-------------------------------------受注CD
                             fname &= "_" & sdate '------------------------------------------開始日
                             fname &= "_" & edate '------------------------------------------終了日
@@ -355,7 +355,7 @@ Public Class Form1
                                 End If
                             End If
 
-                            fname &= "_" & Strings.Left(fnarray(3), 14) '-------------------------------------タイムスタンプ
+                            fname &= "_" & Strings.Left(fnarray(3), 14) '-------------------タイムスタンプ
                             fname &= "_" & fnarray(0) '-------------------------------------受注CD
                             fname &= "_" & sdate '------------------------------------------開始日
                             fname &= "_" & edate '------------------------------------------終了日
@@ -394,34 +394,39 @@ Public Class Form1
                 Dim ac As Integer = fnarray.Length
                 Dim i As Integer
 
-                If fnarray(0) = "501" Or fnarray(0) = "601" Or fnarray(0) = "701" Or fnarray(0) = "801" Or fnarray(0) = "901" Then
+                Try
 
-                    fname = errorstr
-                    fname &= "_" & fnarray(2)
-                    If ac > 3 Then
-                        For i = 4 To ac
-                            If i < ac Then
-                                fname &= "_" & fnarray(i)
-                            End If
-                        Next
-                        fname &= kakutyousi
+                    If fnarray(0) = "501" Or fnarray(0) = "601" Or fnarray(0) = "701" Or fnarray(0) = "801" Or fnarray(0) = "901" Then
+
+                        fname = errorstr
+                        fname &= "_" & fnarray(2)
+                        If ac > 3 Then
+                            For i = 4 To ac
+                                If i < ac Then
+                                    fname &= "_" & fnarray(i)
+                                End If
+                            Next
+                            fname &= kakutyousi
+                        End If
+
+                    Else
+
+                        fname = errorstr
+                        fname &= "_" & fnarray(1)
+                        If ac > 2 Then
+                            For i = 2 To ac
+                                If i < ac Then
+                                    fname &= "_" & fnarray(i)
+                                End If
+                            Next
+                            fname &= kakutyousi
+                        End If
+
                     End If
 
-                Else
-
-                    fname = errorstr
-                    fname &= "_" & fnarray(1)
-                    If ac > 2 Then
-                        For i = 2 To ac
-                            If i < ac Then
-                                fname &= "_" & fnarray(i)
-                            End If
-                        Next
-                        fname &= kakutyousi
-                    End If
-
-                End If
-
+                Catch ex As System.Exception
+                    System.Console.WriteLine(ex.Message)
+                End Try
 
                 ファイル転送("転送1", errorstr, s, moto1 & "\" & fname)
 
