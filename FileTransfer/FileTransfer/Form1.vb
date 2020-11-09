@@ -408,7 +408,7 @@ Public Class Form1
                     If fnarray(0) = "501" Or fnarray(0) = "601" Or fnarray(0) = "701" Or fnarray(0) = "801" Or fnarray(0) = "901" Then
 
                         fname = errorstr
-                        fname &= "_" & fnarray(2)
+                        fname &= fnarray(2)
                         If ac > 3 Then
                             For i = 4 To ac
                                 If i < ac Then
@@ -421,7 +421,7 @@ Public Class Form1
                     Else
 
                         fname = errorstr
-                        fname &= "_" & fnarray(1)
+                        fname &= fnarray(1)
                         If ac > 2 Then
                             For i = 2 To ac
                                 If i < ac Then
