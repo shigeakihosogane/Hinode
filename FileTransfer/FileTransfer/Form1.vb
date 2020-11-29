@@ -457,7 +457,8 @@ Public Class Form1
     Private Sub 転送処理2(ByVal s As String)
 
         'scan ⇒　FAX受信
-
+        Dim maxcount As Integer = 60
+        Dim i As Integer
         Dim fname As String = Path.GetFileNameWithoutExtension(s)
         Dim kakutyousi As String = Path.GetExtension(s)
         Dim dt As Date
@@ -465,42 +466,54 @@ Public Class Form1
         If DateTime.TryParseExact(fname, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
             fname = "scan__" & fname & kakutyousi
         Else
-            fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & kakutyousi
-        End If
 
-        ファイル転送("転送2", "正常", s, saki2 & "\" & fname)
+            For i = 0 To maxcount
+
+                fname = "取込__" & Format(Now(), "yyyyMMddHHmmss" & "_" & i) & kakutyousi
+
+                If System.IO.File.Exists(saki2 & "\" & fname) = False Then
+                    ファイル転送("転送2", "正常", s, saki2 & "\" & fname)
+                    Exit For
+                End If
+
+            Next i
+
+        End If
 
     End Sub
 
-    Private Sub ファイル転送(ByVal syori As String, ByVal kekka As String, ByVal a As String, ByVal b As String)
+    Private Function ファイル転送(ByVal syori As String, ByVal kekka As String, ByVal a As String, ByVal b As String) As Boolean
 
         Try '-----------------------------------------------------------------------------------------ファイルのコピー処理
             If FileOpenCheck(a) = True Then
-                System.IO.File.Copy(a, b, True)
+                System.IO.File.Copy(a, b)
             End If
-        Catch ex As System.IO.FileNotFoundException '---------コピーする元ファイルがない場合
-            System.Console.WriteLine(ex.Message)
-        Catch ex As System.IO.IOException '-------------------コピー先のファイルがすでに存在している場合
-            System.Console.WriteLine(ex.Message)
-        Catch ex As System.UnauthorizedAccessException '------コピー先のファイルへのアクセスが拒否された場合
-            System.Console.WriteLine(ex.Message)
+
+            Try '-----------------------------------------------------------------------------------------ファイルの削除処理
+                If FileOpenCheck(a) = True Then
+                    System.IO.File.Delete(a)
+                End If
+            Catch ex As System.UnauthorizedAccessException '------削除ファイルへのアクセスが拒否された場合
+                System.Console.WriteLine(ex.Message)
+            Catch ex As System.Exception '------------------------すべての例外
+                System.Console.WriteLine(ex.Message)
+            End Try
+
+            ログ保存(syori, kekka, Path.GetFileName(a), Path.GetFileName(b))
+            ファイル転送 = True
+
+            'Catch ex As System.IO.FileNotFoundException '---------コピーする元ファイルがない場合
+            'System.Console.WriteLine(ex.Message)
+            'Catch ex As System.IO.IOException '-------------------コピー先のファイルがすでに存在している場合
+            'System.Console.WriteLine(ex.Message)
+            'Catch ex As System.UnauthorizedAccessException '------コピー先のファイルへのアクセスが拒否された場合
+            'System.Console.WriteLine(ex.Message)
         Catch ex As System.Exception '------------------------すべての例外
             System.Console.WriteLine(ex.Message)
+            ファイル転送 = False
         End Try
 
-        Try '-----------------------------------------------------------------------------------------ファイルの削除処理
-            If FileOpenCheck(a) = True Then
-                System.IO.File.Delete(a)
-            End If
-        Catch ex As System.UnauthorizedAccessException '------削除ファイルへのアクセスが拒否された場合
-            System.Console.WriteLine(ex.Message)
-        Catch ex As System.Exception '------------------------すべての例外
-            System.Console.WriteLine(ex.Message)
-        End Try
-
-        ログ保存(syori, kekka, Path.GetFileName(a), Path.GetFileName(b))
-
-    End Sub
+    End Function
 
     Private Sub 荷主名保存(ByVal ninusiID As Integer, ByVal ninusimeiTF As String)
 
