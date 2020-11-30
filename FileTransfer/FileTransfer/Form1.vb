@@ -472,13 +472,16 @@ Public Class Form1
                 fname = "取込__" & Format(Now(), "yyyyMMddHHmmss" & "_" & i) & kakutyousi
 
                 If System.IO.File.Exists(saki2 & "\" & fname) = False Then
-                    ファイル転送("転送2", "正常", s, saki2 & "\" & fname)
+
                     Exit For
+
                 End If
 
             Next i
 
         End If
+
+        ファイル転送("転送2", "正常", s, saki2 & "\" & fname)
 
     End Sub
 
