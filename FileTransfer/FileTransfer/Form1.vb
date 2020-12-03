@@ -464,7 +464,6 @@ Public Class Form1
         Dim dt As Date
 
         If DateTime.TryParseExact(fname, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
-            fname = "scan__" & fname & kakutyousi
 
             For i = 0 To maxcount
                 fname = "scan__" & fname & "_" & i & kakutyousi
