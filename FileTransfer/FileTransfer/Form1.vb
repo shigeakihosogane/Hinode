@@ -465,18 +465,21 @@ Public Class Form1
 
         If DateTime.TryParseExact(fname, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, dt) = True Then
             fname = "scan__" & fname & kakutyousi
+
+            For i = 0 To maxcount
+                fname = "scan__" & fname & "_" & i & kakutyousi
+                If System.IO.File.Exists(saki2 & "\" & fname) = False Then
+                    Exit For
+                End If
+            Next i
+
         Else
 
             For i = 0 To maxcount
-
-                fname = "取込__" & Format(Now(), "yyyyMMddHHmmss" & "_" & i) & kakutyousi
-
+                fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & "_" & i & kakutyousi
                 If System.IO.File.Exists(saki2 & "\" & fname) = False Then
-
                     Exit For
-
                 End If
-
             Next i
 
         End If
