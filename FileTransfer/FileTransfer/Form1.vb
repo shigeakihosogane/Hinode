@@ -2,6 +2,7 @@
 Imports System.Data.SqlClient
 Imports System.Globalization
 Imports System.IO
+Imports Microsoft.SqlServer.Server
 
 Public Class Form1
 
@@ -237,10 +238,12 @@ Public Class Form1
 
                     Do While reader.Read()
                         If reader("開始日") IsNot DBNull.Value Then
-                            sdate = Format(reader("開始日"), "yyyyMMdd")
+                            'sdate = Format(reader("開始日"), "yyyyMMdd")
+                            sdate = reader("開始日").ToString("yyyyMMdd")
                         End If
                         If reader("終了日") IsNot DBNull.Value Then
-                            edate = Format(reader("終了日"), "yyyyMMdd")
+                            'edate = Format(reader("終了日"), "yyyyMMdd")
+                            edate = reader("終了日").ToString("yyyyMMdd")
                         End If
                         busyo = reader("担当部署")
                         bikou = reader("備考")
@@ -390,6 +393,12 @@ Public Class Form1
                         '-----------------------------------------------------------------------------------------ファイルのコピー処理
                         ファイル転送("転送1", "正常", s, saki1 & "\" & fname)
 
+                        'ここからテスト
+                        Dim copyTo As String = "\\192.168.2.240\fax受信\FAX受信トレイ\受注FAX保管\" & fname
+                        受注FAX保管(s, copyTo)
+
+
+
                     Else
                         flg = False
                         errorstr = "ファイル名不正"
@@ -475,7 +484,8 @@ Public Class Form1
         Else
 
             For i = 0 To maxcount
-                fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & "_" & i & kakutyousi
+                'fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & "_" & i & kakutyousi
+                fname = "取込__" & DateTime.Now.ToString("yyyyMMddHHmmss") & "_" & i & kakutyousi
                 If System.IO.File.Exists(saki2 & "\" & fname) = False Then
                     Exit For
                 End If
@@ -519,6 +529,45 @@ Public Class Form1
         End Try
 
     End Function
+
+    Private Sub 受注FAX保管(ByVal copyFrom As String, ByVal copyTo As String)
+
+        Dim fnarray As Array = Split(Path.GetFileName(copyTo), "_")
+        Dim dirName0 As String = Path.GetDirectoryName(copyTo)
+        Dim dirName1 As String = fnarray(0)
+        Dim dirName2 As String = fnarray(6)
+        Dim dirName3 As String = fnarray(7)
+        Dim filName As String = Path.GetFileName(copyTo)
+        Dim extName As String = Path.GetFileNameWithoutExtension(copyTo)
+        Dim fullPath As String
+
+        '転送先ディレクトリ存在チェック
+        Dim dirNameTo As String = dirName0 & "\" & dirName1 & "\" & dirName2
+        If dirName2 = "4.倉庫保管" Then
+            dirNameTo = dirNameTo & "\" & dirName3
+        End If
+
+        fullPath = dirNameTo & "\" & filName & "." & extName
+        If File.Exists(dirNameTo) = False Then
+            Directory.CreateDirectory(dirNameTo)
+        Else
+            'ファイルの存在チェック（重複の場合ファイル名に(i)を付与）
+            Dim i As Integer = 1
+            While File.Exists(fullPath)
+                fullPath = dirNameTo & "\" & filName & "(" & i.ToString() & ")" & "." & extName
+                i = i + 1
+            End While
+        End If
+
+        Debug.Print(fullPath)
+        'File.Copy(copyFrom, fullPath)
+
+    End Sub
+
+
+
+
+
 
     Private Sub 荷主名保存(ByVal ninusiID As Integer, ByVal ninusimeiTF As String)
 

@@ -105,13 +105,13 @@
       <DependentUpon>UserControl1.vb</DependentUpon>
     </Compile>
     <Compile Include="UserControl1.vb">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="UserControl2.Designer.vb">
       <DependentUpon>UserControl2.vb</DependentUpon>
     </Compile>
     <Compile Include="UserControl2.vb">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
