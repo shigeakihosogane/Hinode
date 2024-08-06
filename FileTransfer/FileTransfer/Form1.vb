@@ -2,7 +2,7 @@
 Imports System.Data.SqlClient
 Imports System.Globalization
 Imports System.IO
-Imports Microsoft.SqlServer.Server
+'Imports Microsoft.SqlServer.Server
 
 Public Class Form1
 
@@ -238,12 +238,12 @@ Public Class Form1
 
                     Do While reader.Read()
                         If reader("開始日") IsNot DBNull.Value Then
-                            'sdate = Format(reader("開始日"), "yyyyMMdd")
-                            sdate = reader("開始日").ToString("yyyyMMdd")
+                            sdate = Format(reader("開始日"), "yyyyMMdd")
+                            'sdate = reader("開始日").ToString("yyyyMMdd")
                         End If
                         If reader("終了日") IsNot DBNull.Value Then
-                            'edate = Format(reader("終了日"), "yyyyMMdd")
-                            edate = reader("終了日").ToString("yyyyMMdd")
+                            edate = Format(reader("終了日"), "yyyyMMdd")
+                            'edate = reader("終了日").ToString("yyyyMMdd")
                         End If
                         busyo = reader("担当部署")
                         bikou = reader("備考")
@@ -390,14 +390,14 @@ Public Class Form1
                         fname &= "_" & pstr '-------------------------------------------ページ
                         fname &= kakutyousi '-------------------------------------------拡張子
 
-                        '-----------------------------------------------------------------------------------------ファイルのコピー処理
-                        ファイル転送("転送1", "正常", s, saki1 & "\" & fname)
 
-                        'ここからテスト
+                        'ここからテスト(新システム向け転送処理）
                         Dim copyTo As String = "\\192.168.2.240\fax受信\FAX受信トレイ\受注FAX保管\" & fname
+                        'Console.WriteLine(copyTo)
                         受注FAX保管(s, copyTo)
 
-
+                        '-----------------------------------------------------------------------------------------ファイルのコピー処理
+                        ファイル転送("転送1", "正常", s, saki1 & "\" & fname)
 
                     Else
                         flg = False
@@ -484,8 +484,8 @@ Public Class Form1
         Else
 
             For i = 0 To maxcount
-                'fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & "_" & i & kakutyousi
-                fname = "取込__" & DateTime.Now.ToString("yyyyMMddHHmmss") & "_" & i & kakutyousi
+                fname = "取込__" & Format(Now(), "yyyyMMddHHmmss") & "_" & i & kakutyousi
+                'fname = "取込__" & DateTime.Now.ToString("yyyyMMddHHmmss") & "_" & i & kakutyousi
                 If System.IO.File.Exists(saki2 & "\" & fname) = False Then
                     Exit For
                 End If
@@ -501,6 +501,7 @@ Public Class Form1
 
         Try '-----------------------------------------------------------------------------------------ファイルのコピー処理
             If FileOpenCheck(a) = True Then
+                'Console.WriteLine(b)
                 System.IO.File.Copy(a, b)
             End If
 
@@ -537,30 +538,33 @@ Public Class Form1
         Dim dirName1 As String = fnarray(0)
         Dim dirName2 As String = fnarray(6)
         Dim dirName3 As String = fnarray(7)
-        Dim filName As String = Path.GetFileName(copyTo)
-        Dim extName As String = Path.GetFileNameWithoutExtension(copyTo)
+        Dim filName As String = Path.GetFileNameWithoutExtension(copyTo)
+        Dim extName As String = Path.GetExtension(copyTo)
         Dim fullPath As String
 
         '転送先ディレクトリ存在チェック
         Dim dirNameTo As String = dirName0 & "\" & dirName1 & "\" & dirName2
-        If dirName2 = "4.倉庫保管" Then
+        If dirName2 = "4.倉庫保管" And dirName3 <> "" Then
             dirNameTo = dirNameTo & "\" & dirName3
         End If
 
-        fullPath = dirNameTo & "\" & filName & "." & extName
+        Console.WriteLine("保存ディレクトリ: " & dirNameTo)
+
+        fullPath = dirNameTo & "\" & filName & extName
         If File.Exists(dirNameTo) = False Then
             Directory.CreateDirectory(dirNameTo)
         Else
             'ファイルの存在チェック（重複の場合ファイル名に(i)を付与）
             Dim i As Integer = 1
             While File.Exists(fullPath)
-                fullPath = dirNameTo & "\" & filName & "(" & i.ToString() & ")" & "." & extName
+                fullPath = dirNameTo & "\" & filName & "(" & i.ToString() & ")" & extName
                 i = i + 1
             End While
         End If
 
-        Debug.Print(fullPath)
-        'File.Copy(copyFrom, fullPath)
+        Console.WriteLine("フルパス: " & fullPath)
+        Console.WriteLine("コピー元: " & copyFrom)
+        File.Copy(copyFrom, fullPath)
 
     End Sub
 
