@@ -551,14 +551,14 @@ Public Class Form1
         Console.WriteLine("保存ディレクトリ: " & dirNameTo)
 
         fullPath = dirNameTo & "\" & filName & extName
-        If File.Exists(dirNameTo) = False Then
+        If Directory.Exists(dirNameTo) = False Then
             Directory.CreateDirectory(dirNameTo)
         Else
             'ファイルの存在チェック（重複の場合ファイル名に(i)を付与）
-            Dim i As Integer = 1
+            Dim i As Integer = 0
             While File.Exists(fullPath)
-                fullPath = dirNameTo & "\" & filName & "(" & i.ToString() & ")" & extName
                 i = i + 1
+                fullPath = dirNameTo & "\" & filName & "(" & i & ")" & extName
             End While
         End If
 
