@@ -40,12 +40,22 @@
             this.label4 = new System.Windows.Forms.Label();
             this.txt転送2稼働時間 = new System.Windows.Forms.TextBox();
             this.lbl表示 = new System.Windows.Forms.Label();
+            this.metroCheckBox1 = new MetroFramework.Controls.MetroCheckBox();
+            this.metroTrackBar1 = new MetroFramework.Controls.MetroTrackBar();
+            this.metroRadioButton1 = new MetroFramework.Controls.MetroRadioButton();
+            this.metroDateTime1 = new MetroFramework.Controls.MetroDateTime();
+            this.metroComboBox1 = new MetroFramework.Controls.MetroComboBox();
+            this.htmlPanel1 = new MetroFramework.Drawing.Html.HtmlPanel();
+            this.metroTabControl1 = new MetroFramework.Controls.MetroTabControl();
+            this.metroTile1 = new MetroFramework.Controls.MetroTile();
+            this.metroListView1 = new MetroFramework.Controls.MetroListView();
+            this.metroToggle1 = new MetroFramework.Controls.MetroToggle();
             this.SuspendLayout();
             // 
             // lbl状況
             // 
             this.lbl状況.Font = new System.Drawing.Font("Meiryo UI", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbl状況.Location = new System.Drawing.Point(42, 18);
+            this.lbl状況.Location = new System.Drawing.Point(639, 101);
             this.lbl状況.Name = "lbl状況";
             this.lbl状況.Size = new System.Drawing.Size(400, 50);
             this.lbl状況.TabIndex = 4;
@@ -117,17 +127,125 @@
             // 
             // lbl表示
             // 
-            this.lbl表示.Location = new System.Drawing.Point(57, 442);
+            this.lbl表示.Location = new System.Drawing.Point(45, 506);
             this.lbl表示.Name = "lbl表示";
             this.lbl表示.Size = new System.Drawing.Size(830, 81);
             this.lbl表示.TabIndex = 27;
             this.lbl表示.Text = "表示";
+            // 
+            // metroCheckBox1
+            // 
+            this.metroCheckBox1.AutoSize = true;
+            this.metroCheckBox1.Location = new System.Drawing.Point(76, 262);
+            this.metroCheckBox1.Name = "metroCheckBox1";
+            this.metroCheckBox1.Size = new System.Drawing.Size(114, 15);
+            this.metroCheckBox1.TabIndex = 28;
+            this.metroCheckBox1.Text = "metroCheckBox1";
+            this.metroCheckBox1.UseSelectable = true;
+            // 
+            // metroTrackBar1
+            // 
+            this.metroTrackBar1.BackColor = System.Drawing.Color.Transparent;
+            this.metroTrackBar1.Location = new System.Drawing.Point(76, 330);
+            this.metroTrackBar1.Name = "metroTrackBar1";
+            this.metroTrackBar1.Size = new System.Drawing.Size(75, 23);
+            this.metroTrackBar1.TabIndex = 29;
+            this.metroTrackBar1.Text = "metroTrackBar1";
+            // 
+            // metroRadioButton1
+            // 
+            this.metroRadioButton1.AutoSize = true;
+            this.metroRadioButton1.Location = new System.Drawing.Point(186, 338);
+            this.metroRadioButton1.Name = "metroRadioButton1";
+            this.metroRadioButton1.Size = new System.Drawing.Size(127, 15);
+            this.metroRadioButton1.TabIndex = 30;
+            this.metroRadioButton1.Text = "metroRadioButton1";
+            this.metroRadioButton1.UseSelectable = true;
+            // 
+            // metroDateTime1
+            // 
+            this.metroDateTime1.Location = new System.Drawing.Point(407, 331);
+            this.metroDateTime1.MinimumSize = new System.Drawing.Size(0, 29);
+            this.metroDateTime1.Name = "metroDateTime1";
+            this.metroDateTime1.Size = new System.Drawing.Size(200, 29);
+            this.metroDateTime1.TabIndex = 31;
+            // 
+            // metroComboBox1
+            // 
+            this.metroComboBox1.FormattingEnabled = true;
+            this.metroComboBox1.ItemHeight = 23;
+            this.metroComboBox1.Location = new System.Drawing.Point(673, 338);
+            this.metroComboBox1.Name = "metroComboBox1";
+            this.metroComboBox1.Size = new System.Drawing.Size(121, 29);
+            this.metroComboBox1.TabIndex = 32;
+            this.metroComboBox1.UseSelectable = true;
+            // 
+            // htmlPanel1
+            // 
+            this.htmlPanel1.AutoScroll = true;
+            this.htmlPanel1.AutoScrollMinSize = new System.Drawing.Size(574, 18);
+            this.htmlPanel1.BackColor = System.Drawing.SystemColors.Window;
+            this.htmlPanel1.Location = new System.Drawing.Point(252, 416);
+            this.htmlPanel1.Name = "htmlPanel1";
+            this.htmlPanel1.Size = new System.Drawing.Size(574, 128);
+            this.htmlPanel1.TabIndex = 33;
+            this.htmlPanel1.Text = "htmlPanel1";
+            // 
+            // metroTabControl1
+            // 
+            this.metroTabControl1.Location = new System.Drawing.Point(839, 293);
+            this.metroTabControl1.Name = "metroTabControl1";
+            this.metroTabControl1.Size = new System.Drawing.Size(200, 193);
+            this.metroTabControl1.TabIndex = 34;
+            this.metroTabControl1.UseSelectable = true;
+            // 
+            // metroTile1
+            // 
+            this.metroTile1.ActiveControl = null;
+            this.metroTile1.Location = new System.Drawing.Point(407, 262);
+            this.metroTile1.Name = "metroTile1";
+            this.metroTile1.Size = new System.Drawing.Size(254, 23);
+            this.metroTile1.TabIndex = 35;
+            this.metroTile1.Text = "metroTile1";
+            this.metroTile1.UseSelectable = true;
+            // 
+            // metroListView1
+            // 
+            this.metroListView1.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.metroListView1.FullRowSelect = true;
+            this.metroListView1.Location = new System.Drawing.Point(705, 186);
+            this.metroListView1.Name = "metroListView1";
+            this.metroListView1.OwnerDraw = true;
+            this.metroListView1.Size = new System.Drawing.Size(219, 97);
+            this.metroListView1.TabIndex = 36;
+            this.metroListView1.UseCompatibleStateImageBehavior = false;
+            this.metroListView1.UseSelectable = true;
+            // 
+            // metroToggle1
+            // 
+            this.metroToggle1.AutoSize = true;
+            this.metroToggle1.Location = new System.Drawing.Point(71, 391);
+            this.metroToggle1.Name = "metroToggle1";
+            this.metroToggle1.Size = new System.Drawing.Size(80, 16);
+            this.metroToggle1.TabIndex = 37;
+            this.metroToggle1.Text = "Off";
+            this.metroToggle1.UseSelectable = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1100, 689);
+            this.Controls.Add(this.metroToggle1);
+            this.Controls.Add(this.metroListView1);
+            this.Controls.Add(this.metroTile1);
+            this.Controls.Add(this.metroTabControl1);
+            this.Controls.Add(this.htmlPanel1);
+            this.Controls.Add(this.metroComboBox1);
+            this.Controls.Add(this.metroDateTime1);
+            this.Controls.Add(this.metroRadioButton1);
+            this.Controls.Add(this.metroTrackBar1);
+            this.Controls.Add(this.metroCheckBox1);
             this.Controls.Add(this.lbl表示);
             this.Controls.Add(this.chk転送2);
             this.Controls.Add(this.label4);
@@ -158,6 +276,16 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox txt転送2稼働時間;
         private System.Windows.Forms.Label lbl表示;
+        private MetroFramework.Controls.MetroCheckBox metroCheckBox1;
+        private MetroFramework.Controls.MetroTrackBar metroTrackBar1;
+        private MetroFramework.Controls.MetroRadioButton metroRadioButton1;
+        private MetroFramework.Controls.MetroDateTime metroDateTime1;
+        private MetroFramework.Controls.MetroComboBox metroComboBox1;
+        private MetroFramework.Drawing.Html.HtmlPanel htmlPanel1;
+        private MetroFramework.Controls.MetroTabControl metroTabControl1;
+        private MetroFramework.Controls.MetroTile metroTile1;
+        private MetroFramework.Controls.MetroListView metroListView1;
+        private MetroFramework.Controls.MetroToggle metroToggle1;
     }
 }
 

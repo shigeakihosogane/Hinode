@@ -10,10 +10,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Dapper;
+using MetroFramework.Forms; // 追加
 
 namespace FileTransfer2
 {
-    public partial class Form1 : Form
+    public partial class Form1 : MetroForm/* ←変更 */
     {
         string connectionString = "User ID=hinode;Password=Hkanri8739;Initial Catalog=HINODEDB;Data Source=hinode-server.database.windows.net;TrustServerCertificate=True";
         

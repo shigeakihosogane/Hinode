@@ -162,6 +162,7 @@ Public Class Form1
                                Dim kakutyousi As String = Path.GetExtension(f1.FullName) '拡張子
                                If kakutyousi = ".tmp" Or kakutyousi = ".db" Then
                                Else
+                                   Test用転送(f1.FullName)
                                    転送処理1(f1.FullName)
                                    Console.WriteLine(f1.FullName)
                                End If
@@ -171,6 +172,7 @@ Public Class Form1
                                Dim kakutyousi As String = Path.GetExtension(f2.FullName) '拡張子
                                If kakutyousi = ".tmp" Or kakutyousi = ".db" Then
                                Else
+                                   Test用転送(f2.FullName)
                                    転送処理2(f2.FullName)
                                    Console.WriteLine(f2.FullName)
                                End If
@@ -188,7 +190,18 @@ Public Class Form1
 
     End Sub
 
+    Private Sub Test用転送(ByVal s As String)
+
+        Dim fi As New FileInfo(s)
+        Dim fn As String = Path.GetFileName(s)
+        Dim copyFile As FileInfo = fi.CopyTo("\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\" & fn)
+
+    End Sub
+
+
     Private Sub 転送処理1(ByVal s As String)
+
+
 
         'Fax受信　⇒　ThereforDATA
 
@@ -205,8 +218,8 @@ Public Class Form1
 
             Dim zyutyuuCD As Decimal = CDec(fnarray(0))
 
-            Dim sqlstr As String = "SELECT dbo.T_TF_D_Index.受注ID, dbo.T_TF_D_Index.開始日, dbo.T_TF_D_Index.終了日, dbo.T_TF_D_Index.担当部署, dbo.T_TF_D_Index.備考, dbo.T_TF_D_Index.荷主ID, dbo.T_TF_M_NinusiInfo.名称_HND, dbo.T_TF_M_NinusiInfo.名称_TF, dbo.T_TF_M_NinusiInfo.FAX番号 "
-            sqlstr &= "FROM dbo.T_TF_D_Index LEFT OUTER JOIN dbo.T_TF_M_NinusiInfo ON dbo.T_TF_D_Index.荷主ID = dbo.T_TF_M_NinusiInfo.荷主ID "
+            Dim sqlstr As String = "Select dbo.T_TF_D_Index.受注ID, dbo.T_TF_D_Index.開始日, dbo.T_TF_D_Index.終了日, dbo.T_TF_D_Index.担当部署, dbo.T_TF_D_Index.備考, dbo.T_TF_D_Index.荷主ID, dbo.T_TF_M_NinusiInfo.名称_HND, dbo.T_TF_M_NinusiInfo.名称_TF, dbo.T_TF_M_NinusiInfo.FAX番号 "
+            sqlstr &= "FROM dbo.T_TF_D_Index LEFT OUTER JOIN dbo.T_TF_M_NinusiInfo On dbo.T_TF_D_Index.荷主ID = dbo.T_TF_M_NinusiInfo.荷主ID "
             sqlstr &= "WHERE (dbo.T_TF_D_Index.受注ID = " & zyutyuuCD & ")"
 
             Dim cn As SqlClient.SqlConnection
@@ -548,7 +561,7 @@ Public Class Form1
             dirNameTo = dirNameTo & "\" & dirName3
         End If
 
-        Console.WriteLine("保存ディレクトリ: " & dirNameTo)
+        'Console.WriteLine("保存ディレクトリ: " & dirNameTo)
 
         fullPath = dirNameTo & "\" & filName & extName
         If Directory.Exists(dirNameTo) = False Then
@@ -562,8 +575,8 @@ Public Class Form1
             End While
         End If
 
-        Console.WriteLine("フルパス: " & fullPath)
-        Console.WriteLine("コピー元: " & copyFrom)
+        'Console.WriteLine("フルパス: " & fullPath)
+        'Console.WriteLine("コピー元: " & copyFrom)
         File.Copy(copyFrom, fullPath)
 
     End Sub
