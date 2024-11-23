@@ -198,15 +198,17 @@ Public Class Form1
         Dim fi As New FileInfo(s)
         Dim fn As String = Path.GetFileName(s)
         Dim i As Integer
-        Dim copyTo As String = "\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\"
-
+        Dim copyToDir As String = "\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\"
+        Dim copyTo As String = copyToDir & fnwx & fnex
         If File.Exists(s) Then
-            While File.Exists(copyTo & fnwx & fnex)
-                copyTo = copyTo & fnwx & "(" & i & ")" & fnex
+
+            While File.Exists(copyTo)
+                copyTo = copyToDir & fnwx & "(" & i & ")" & fnex
                 i = i + 1
             End While
 
-            Dim copyFile As FileInfo = fi.CopyTo("\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\" & fn)
+            Dim copyFile As FileInfo = fi.CopyTo(copyTo)
+
         End If
 
     End Sub
@@ -590,6 +592,8 @@ Public Class Form1
 
         'Console.WriteLine("フルパス: " & fullPath)
         'Console.WriteLine("コピー元: " & copyFrom)
+
+
         File.Copy(copyFrom, fullPath)
 
     End Sub
