@@ -192,9 +192,22 @@ Public Class Form1
 
     Private Sub Test用転送(ByVal s As String)
 
+        Dim fnwx As String = Path.GetFileNameWithoutExtension(s) 'ファイル名
+        Dim fnex As String = Path.GetExtension(s) '拡張子 
+
         Dim fi As New FileInfo(s)
         Dim fn As String = Path.GetFileName(s)
-        Dim copyFile As FileInfo = fi.CopyTo("\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\" & fn)
+        Dim i As Integer
+        Dim copyTo As String = "\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\"
+
+        If File.Exists(s) Then
+            While File.Exists(copyTo & fnwx & fnex)
+                copyTo = copyTo & fnwx & "(" & i & ")" & fnex
+                i = i + 1
+            End While
+
+            Dim copyFile As FileInfo = fi.CopyTo("\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\" & fn)
+        End If
 
     End Sub
 
