@@ -1,0 +1,92 @@
+﻿@inject ArchiveService ArchiveService
+
+<h3>Status</h3>
+<RadzenCard class="rz-my-12 rz-mx-auto" Style="height: auto;">
+    <RadzenRow RowGap="0">
+        <RadzenColumn SizeSM="5">
+            <h3>メイン転送</h3>
+        </RadzenColumn>
+        <RadzenColumn SizeSM="7">
+            <p>受信FAX転送・Scan転送・取込転送</p>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @if (isRun)
+    {
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="12">
+                <h2>@mainTimerStatus</h2>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="6">
+                <p>開始日時 : @mainTimerStartDateTime</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="6">
+                <p>稼働時間：@FormattedElapsedTime(mainTimerElapsedTime)</p>
+            </RadzenColumn>
+        </RadzenRow>
+    }
+    else
+    {
+        <h2>待機中</h2>
+    } 
+
+</RadzenCard>
+
+<RadzenCard class="rz-my-12 rz-mx-auto" Style="height: auto;">
+    <RadzenRow RowGap="0">
+        <RadzenColumn SizeSM="5">
+            <h3>アーカイブ転送</h3>
+        </RadzenColumn>
+        <RadzenColumn SizeSM="7">
+            <p>請求処理完了FAX・期間超過FAX</p>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow RowGap="0">
+        <RadzenColumn SizeSM="12">
+            <h2>稼働中</h2>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow RowGap="0">
+        <RadzenColumn SizeSM="6">
+            <p>前回実行日時 : @lastExecutionTime</p>
+            <p>処理件数 : @archiveProcessedCount.ToString()</p>
+        </RadzenColumn>
+        <RadzenColumn SizeSM="6">
+            <p>次回実行日時 : @nextExecutionTime</p>
+            <RadzenButton Click=@(args => InvokeRunArchiveNow()) Text="アーカイブ" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+
+@code {
+    [Parameter] public bool isRun { get; set; }
+    [Parameter] public DateTime? mainTimerStartDateTime { get; set; }
+    [Parameter] public int mainTimerElapsedTime { get; set; }
+    [Parameter] public string mainTimerStatus { get; set; } = "";
+
+    [Parameter] public DateTime? nextExecutionTime { get; set; }
+    [Parameter] public DateTime? lastExecutionTime { get; set; }
+    [Parameter] public int archiveProcessedCount { get; set; }
+        
+    [Parameter] public EventCallback OnRunArchiveNow { get; set; }
+
+    private string FormattedElapsedTime(int seconds)
+    {
+        var timeSpan = TimeSpan.FromSeconds(seconds);
+        return $"{timeSpan.Days}日 {timeSpan.Hours}時間 {timeSpan.Minutes}分 {timeSpan.Seconds}秒";
+    }
+
+    private async Task InvokeRunArchiveNow()
+    {
+        if (OnRunArchiveNow.HasDelegate)
+        {
+            await OnRunArchiveNow.InvokeAsync(null);
+        }
+    }
+
+
+
+}
