@@ -1,0 +1,41 @@
+﻿<h3>Home Page</h3>
+@* <p>Welcome to the Home page!</p> *@
+
+@* <RadzenCard class="rz-my-12 rz-mx-auto" Style="height: auto;">
+    
+</RadzenCard> *@
+<RadzenPanel class="rz-my-0 rz-mx-auto" Style="width: auto; height: 590px;">
+    <br />
+    <br />
+
+    <RadzenRow RowGap="0">
+        <RadzenColumn SizeSM="8">
+            <h2>ファイル転送を開始してください</h2>
+        </RadzenColumn>
+        <RadzenColumn SizeSM="4">
+            <RadzenSelectBar Size="ButtonSize.Large" Value="@isRun" TValue="bool" Change="OnValueChanged">
+                <Items>
+                    <RadzenSelectBarItem Text="IDLE" Value="false" />
+                    <RadzenSelectBarItem Text="RUN" Value="true" />
+                </Items>
+            </RadzenSelectBar>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenPanel>
+
+
+
+@code {
+    [Parameter] public bool isRun { get; set; }
+    [Parameter] public EventCallback<bool> OnIsRunChanged { get; set; }
+
+
+    private async Task OnValueChanged(bool newValue)
+    {
+        isRun = newValue;
+        if (OnIsRunChanged.HasDelegate)
+        {
+            await OnIsRunChanged.InvokeAsync(isRun);
+        }
+    }
+}

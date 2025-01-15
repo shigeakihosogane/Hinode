@@ -1,0 +1,233 @@
+﻿@inject FolderPickerService FolderPickerService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+
+<RadzenRow RowGap="0">
+    <RadzenColumn SizeSM="2">
+        <h3>Transfer Settings</h3>
+    </RadzenColumn>
+    <RadzenColumn SizeSM="7">
+        <p>@message</p>
+    </RadzenColumn>
+    <RadzenColumn SizeSM="2">
+        <RadzenSelectBar Value="@isRun" TValue="bool" Change="OnValueChanged">
+            <Items>
+                <RadzenSelectBarItem Text="IDLE" Value="false" />
+                <RadzenSelectBarItem Text="RUN" Value="true" />
+            </Items>
+        </RadzenSelectBar>
+    </RadzenColumn>
+    <RadzenColumn SizeSM="1">
+        <RadzenButton Click=@(args => SaveSetting("保存ボタンが押されました")) Text="保存" ButtonStyle="ButtonStyle.Secondary" />
+    </RadzenColumn>
+
+
+</RadzenRow>
+@if (_tempSetting == null)
+{ 
+    <p>設定を読み込んでいます。</p>
+}
+else
+{
+    <RadzenCard class="rz-my-12 rz-mx-auto" Style="height: auto;">
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>システム設定</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="3">
+               
+            </RadzenColumn>
+            <RadzenColumn SizeSM="7">
+                <p></p>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>監視インターバル</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@(_tempSetting.MonitoringInterval / 1000) 秒間隔</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("MonitoringInterval")) Text="..." ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>日次処理実行時間</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.ScheduledExecutionTime.ToString("H:mm")</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("MonitoringInterval")) Text="..." ButtonStyle="ButtonStyle.Light" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>転送待ち期間</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.TransferQueueTime 日</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("MonitoringInterval")) Text="..." ButtonStyle="ButtonStyle.Light" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+    <RadzenCard class="rz-my-12 rz-mx-auto" Style="height: auto;">
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>転送1</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="3">
+                <p>Scan・取込</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="7">
+                <p></p>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>Monitoring</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.Trans1Monitoring</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("Trans1Monitoring")) Text="..." ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>Successful</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.Trans1Successful</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("Trans1Successful")) Text="..." ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+    <RadzenCard class="rz-my-12 rz-mx-auto" Style="height: auto;">
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>転送2</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="3">
+                <p>FAX一時保管転送</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="7">
+                <p></p>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>Monitoring</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.Trans2Monitoring</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("Trans2Monitoring")) Text="..." ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>Successful</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.Trans2Successful</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("Trans2Successful")) Text="..." ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0">
+            <RadzenColumn SizeSM="2">
+                <p>Error</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="9">
+                <p>@_tempSetting.Trans2Error</p>
+            </RadzenColumn>
+            <RadzenColumn SizeSM="1">
+                <RadzenButton Click=@(args => GetFolderPath("Trans2Error")) Text="..." ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.ExtraSmall" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+}
+
+@code{
+    [Parameter] public bool isRun { get; set; }
+    [Parameter] public EventCallback<bool> OnIsRunChanged { get; set; }
+
+    [Parameter] public Setting? setting { get; set; } = null;
+
+    private Setting? _tempSetting = new Setting();
+    private string message = "";
+      
+
+    protected override void OnParametersSet()
+    {
+        _tempSetting = setting;
+    }
+
+    private async void GetFolderPath(string btntext)
+    {
+        if (_tempSetting != null)
+        {
+            var selectedfolder = await FolderPickerService.GetFolderPathAsync();
+            switch (btntext)
+            {
+                case "Trans1Monitoring":
+                    _tempSetting.Trans1Monitoring = selectedfolder;
+                    break;
+                case "Trans1Successful":
+                    _tempSetting.Trans1Successful = selectedfolder;
+                    break;
+                case "Trans2Monitoring":
+                    _tempSetting.Trans2Monitoring = selectedfolder;
+                    break;
+                case "Trans2Successful":
+                    _tempSetting.Trans2Successful = selectedfolder;
+                    break;
+                case "Trans2Error":
+                    _tempSetting.Trans2Error = selectedfolder;
+                    break;
+            };
+        }
+        StateHasChanged();
+    }
+
+    public void SaveSetting(string text)
+    {
+        ShowNotification(text);
+    }
+    
+    private void ShowNotification(string text)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Info,
+            Summary = "通知",
+            Detail = text,
+            Duration = 4000
+        });
+        StateHasChanged();
+    }
+
+    private async Task OnValueChanged(bool newValue)
+    {
+        isRun = newValue;
+        if (OnIsRunChanged.HasDelegate)
+        {
+            await OnIsRunChanged.InvokeAsync(isRun);
+        }
+    }
+
+}

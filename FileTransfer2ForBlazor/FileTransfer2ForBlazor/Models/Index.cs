@@ -1,8 +1,10 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using System;
-
-namespace WindowsFormsApp2.Models
+namespace FileTransfer2ForBlazor.Models
 {
     public class Index
     {
@@ -17,24 +19,7 @@ namespace WindowsFormsApp2.Models
         public string 名称_HND { get; set; } = "";
         public string 名称_TF { get; set; } = "";
         public string FAX番号 { get; set; } = "";
+        public int 請求締日 { get; set; } = 1;
 
     }
-
-    public class ArchiveInfo
-    {
-        public decimal 受注ID { get; set; } = 0;        
-        public decimal Amount { get; set; }=0;
-        public bool ArchiveFlag { get; set; }=false;
-        
-    }
-
-    
-
-
-
-
 }
-
-
-
-

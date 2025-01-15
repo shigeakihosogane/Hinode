@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using WindowsFormsApp2.Models;
 using WindowsFormsApp2.Properties;
@@ -82,9 +85,90 @@ WHERE                       (dbo.T_TF_D_Index.受注ID = @ZID)";
             return index;
         }
 
+        public async static Task UpdateFullPath(Decimal zID,string fullPath)
+        {
+            var sql = @"UPDATE TT_TF_D_Index
+SET FullPath = @FullPath
+WHERE (dbo.T_TF_D_Index.受注ID = @ZID)";
+
+            await Task.Run(() =>
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        command.Parameters.Add(new SqlParameter("@ZID", zID));
+                        command.Parameters.Add(new SqlParameter("@FullPath", fullPath));
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("SQLエラー: " + ex.Message);
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        Console.WriteLine("データベース接続エラー: " + ex.Message);
+                    }
+                }
+            });
+        }
 
 
+        public async static Task<List<ArchiveInfo>> GetArchiveListAsync()
+        {
+            var archiveInfos = new List<ArchiveInfo>();
+            var sql = @"SELECT 受注ID, Amount, ArchiveFlag 
+FROM T_TF_D_Index
+WHERE ArchiveFlag = 1";
 
+            await Task.Run(() =>
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                try
+                                {
+                                    while (reader.Read())
+                                    {
+                                        var archiveInfo = new ArchiveInfo();
+                                        archiveInfo.受注ID = Convert.ToDecimal(reader["受注ID"]);
+                                        archiveInfo.Amount = Convert.ToDecimal(reader["Amount"]);
+                                        archiveInfo.ArchiveFlag = Convert.ToBoolean(reader["ArchiveFlag"]);
+                                        archiveInfos.Add(archiveInfo);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"エラーの詳細: {ex.Message}");
+                                }
+                            }
+                            else
+                            {
+                                archiveInfos = null;
+                            }
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        Console.WriteLine("データベース接続エラー: " + ex.Message);
+                    }
+                }
+            });
+
+            return archiveInfos;
+        }
 
 
 

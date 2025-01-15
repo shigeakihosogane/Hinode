@@ -1,0 +1,84 @@
+﻿@inherits LayoutComponentBase
+<h3>Log</h3>
+
+<RadzenTabs TabPosition="@tabPosition" RenderMode="TabRenderMode.Client" >
+    <Tabs>
+        <!-- ファイル転送履歴タブ -->
+        <RadzenTabsItem Text="ファイル転送履歴">
+            <div class="data-grid-wrapper">
+                <RadzenDataGrid AllowColumnResize="true"  Style="height:460px"
+                                Data="@fileTranceferLogs" TItem="FileTranceferLog">
+                    <Columns>
+                        <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" />
+                        <RadzenDataGridColumn Property="Process" Title="処理" Width="80px" />
+                        <RadzenDataGridColumn Property="Result" Title="結果" Width="80px" />
+                        <RadzenDataGridColumn Title="ファイル名" Width="600px">
+                            <Template Context="data">
+                                @Path.GetFileName(data.FullPathBeforeTransfer)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="転送先" Width="400px">
+                            <Template Context="data">
+                                @Path.GetDirectoryName(data.FullPathAfterTransfer)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="ProcessedDateTime" Title="処理日時" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
+                    </Columns>
+                </RadzenDataGrid>
+            </div>
+        </RadzenTabsItem>
+
+        <!-- アーカイブ履歴タブ -->
+        <RadzenTabsItem Text="アーカイブ履歴">
+            <div class="data-grid-wrapper">
+                <RadzenDataGrid AllowColumnResize="true" Style="height:460px;  "
+                                Data="@fileTransferHistorys" TItem="FileTransferHistory">
+                    <Columns>
+                        <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" />
+                        <RadzenDataGridColumn Property="ZyutyuuID" Title="受注ID" Width="100px" />
+                        <RadzenDataGridColumn Title="ファイル名" Width="600px">
+                            <Template Context="data">
+                                @Path.GetFileName(data.DefaultFullPath)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="一時保管" Width="450px">
+                            <Template Context="data">
+                                @Path.GetDirectoryName(data.TemporaryStorageFullPath)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="TemporaryStorageTime" Title="一時保管時間" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
+                        <RadzenDataGridColumn Property="TemporaryStorageLimit" Title="一時保管期限" Width="90px" FormatString="{0:yyyy-MM-dd}" />
+                        <RadzenDataGridColumn Title="アーカイブ" Width="450px">
+                            <Template Context="data">
+                                @Path.GetDirectoryName(data.ArchiveFullPath)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="ArchiveTime" Title="アーカイブ時間" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
+                        <RadzenDataGridColumn Property="OrderAmount" Title="受注金額" Width="100px" />
+                    </Columns>
+                </RadzenDataGrid>
+            </div>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+
+@code {
+    [Parameter]public List<FileTransferHistory>? fileTransferHistorys { get; set; }
+    [Parameter]public List<FileTranceferLog>? fileTranceferLogs{ get; set; }
+
+    TabPosition tabPosition = TabPosition.Top;
+
+    protected override void OnParametersSet()
+    {
+        if (fileTranceferLogs!=null)
+        {
+            fileTranceferLogs = fileTranceferLogs.OrderByDescending(l => l.Id).ToList();
+        }
+        if(fileTransferHistorys!=null)
+        {
+            fileTransferHistorys = fileTransferHistorys.OrderByDescending(h => h.Id).ToList();
+        }
+    }
+
+}

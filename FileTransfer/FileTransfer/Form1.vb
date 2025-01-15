@@ -172,7 +172,7 @@ Public Class Form1
                                Dim kakutyousi As String = Path.GetExtension(f2.FullName) '拡張子
                                If kakutyousi = ".tmp" Or kakutyousi = ".db" Then
                                Else
-                                   Test用転送(f2.FullName)
+                                   'Test用転送(f2.FullName)
                                    転送処理2(f2.FullName)
                                    Console.WriteLine(f2.FullName)
                                End If
@@ -593,8 +593,11 @@ Public Class Form1
         'Console.WriteLine("フルパス: " & fullPath)
         'Console.WriteLine("コピー元: " & copyFrom)
 
-
-        File.Copy(copyFrom, fullPath)
+        Try
+            File.Copy(copyFrom, fullPath)
+        Catch ex As Exception
+            Console.WriteLine(ex)
+        End Try
 
     End Sub
 

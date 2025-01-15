@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,8 +49,8 @@ ORDER BY               ID DESC";
                                         Convert.ToInt32(reader["ID"]),
                                         Convert.ToString(reader["処理"]),
                                         Convert.ToString(reader["結果"]),
-                                        Convert.ToString(reader["変更前Fullpath"]),
-                                        Convert.ToString(reader["変更後Fullpath"]),
+                                        Path.GetFileName(Convert.ToString(reader["変更前Fullpath"])),
+                                        Path.GetFileName(Convert.ToString(reader["変更後Fullpath"])),
                                         Convert.ToDateTime(reader["日時"])
                                         ));
                                 }

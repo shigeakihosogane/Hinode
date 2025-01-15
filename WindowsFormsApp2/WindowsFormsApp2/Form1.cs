@@ -557,6 +557,9 @@ namespace WindowsFormsApp2
                 }
                 else
                 {
+                    //システム移行用
+                    await this.システム移行用増長ファイル作成(file);
+
                     //正常転送処理
                     await this.転送1_正常転送(tranceferFileInfo);
                 }
@@ -602,17 +605,33 @@ namespace WindowsFormsApp2
                 {
                     newPath = directoryTo + @"\" + newFileName + "(" + i.ToString() + ")" + tranceferFileInfo.拡張子;
                     i++;
-                }          
+                }
+
+//ここからTherefore転送
+                //var newTfDir = @"\\192.168.2.240\ThereforeDATA\";
+                //var newTfPath = newTfDir + newFileName + tranceferFileInfo.拡張子;
+                //i = 0;
+                //while (File.Exists(newTfPath))
+                //{
+                //    newTfPath = newTfDir + newFileName + "(" + i.ToString() + ")" + tranceferFileInfo.拡張子;
+                //    i++;
+                //}
+//ここまで
 
                 try
                 {
-                    //TEST
-                    await 転送1_ImageToDB(tranceferFileInfo);
+                    var faxdataRegistrationHistory = new FaxdataRegistrationHistory();
+                    faxdataRegistrationHistory.ZyutyuuID = Convert.ToDecimal(tranceferFileInfo.受注CD);
+                    faxdataRegistrationHistory.CreateDateTime = DateTime.Now;
+                    faxdataRegistrationHistory.TempFullPath = newPath;
+                    await FaxdataRegistrationHistoryService.InsertFaxdataAsync(faxdataRegistrationHistory);
+                    
+                    //await IndexService.UpdateFullPath(Convert.ToDecimal(tranceferFileInfo.受注CD), newPath);
 
-                    FileInfo fileInfo = new FileInfo(tranceferFileInfo.元ファイルFullPath);
+                    FileInfo fileInfo = new FileInfo(tranceferFileInfo.元ファイルFullPath);                    
+                    ////fileInfo.CopyTo(newTfPath);
                     fileInfo.MoveTo(newPath);
-                    log.変更後Fullpath = newPath;                    
-
+                    log.変更後Fullpath = newPath;        
                 }
                 catch (Exception e)
                 {
@@ -672,20 +691,24 @@ namespace WindowsFormsApp2
         {
             await NinusiInfoService.UpdateFaxNumberAsync(ninusiID, faxnumber);
         }
-
-        private async Task 転送1_ImageToDB(TranceferFileInfo tranceferFileInfo)
+               
+        private async Task システム移行用増長ファイル作成(string file)
         {
-            ImageInfo imageInfo = new ImageInfo();
-            imageInfo.ImageData = File.ReadAllBytes(tranceferFileInfo.元ファイルFullPath);
-            imageInfo.ImageName = Path.GetFileName(tranceferFileInfo.元ファイルFullPath);
-            imageInfo.IdDelete = false;
-            imageInfo.受注ID = Convert.ToDecimal(tranceferFileInfo.受注CD);
-            imageInfo.荷主名 = tranceferFileInfo.荷主名;
-            imageInfo.担当部署 = tranceferFileInfo.担当部署;
-            imageInfo.備考 = tranceferFileInfo.備考;
-            imageInfo.開始日 = DateTime.ParseExact(tranceferFileInfo.開始日, "yyyyMMdd", null);
-            imageInfo.終了日 = DateTime.ParseExact(tranceferFileInfo.終了日, "yyyyMMdd", null);
-            await ImageService.AddImageDataToDBAsync(imageInfo);
+            await Task.Run(() =>
+            {
+                var fullPath = Path.GetFullPath(file);
+                var fileName = Path.GetFileName(file);
+                var newPath = @"\\192.168.2.240\fax受信\FAX受信トレイ\FAX転送2\" + fileName;
+                try
+                {
+                    FileInfo fileInfo = new FileInfo(fullPath);
+                    fileInfo.CopyTo(newPath);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            });
         }
 
 
@@ -729,24 +752,30 @@ namespace WindowsFormsApp2
                     {
                         FileInfo fileInfo = new FileInfo(fullPath);
                         fileInfo.MoveTo(newFullPath);
-                        log.結果 = "正常";
+                        emsg = "正常";
                         log.変更後Fullpath = newFullPath;
-                        await this.AddTranceferLog(log);
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
-                        log.結果 = "移動時エラー";
-                        await this.AddTranceferLog(log);
+                        emsg = "移動時エラー";
                     }
                 }
                 catch
                 {
-                    log.結果 = "例外発生";
-                    await this.AddTranceferLog(log);
+                    emsg = "例外発生";
                 }
+                log.結果 = emsg;
+                await this.AddTranceferLog(log);
             });
         }
+
+
+
+
+
+
+
 
 
 
@@ -788,6 +817,7 @@ namespace WindowsFormsApp2
             var zanCount = 0;
             await Task.Run(() =>
             {
+                //経過日数を過ぎたファイルをアーカイブ
                 //MessageBox.Show("指定の時間になりました。タスクを実行します。");   
                 var path = _setting.転送1_転送;
                 var di = new DirectoryInfo(path);
@@ -818,8 +848,84 @@ namespace WindowsFormsApp2
                 files = di.GetFiles("*", SearchOption.AllDirectories);
                 zanCount = files.Length;
             });
+
+            //請求処理済をアーカイブ
+            //var archiveInfos = new List<ArchiveInfo>();
+            //archiveInfos = await IndexService.GetArchiveListAsync();
+            //if (archiveInfos != null)
+            //{
+            //    //ﾂﾙﾏﾌｰｽﾞ_0253758771_20241007155039_12241018238_20241019_20241019_1.県外発送_6241007138　　20241008202410081.県外発送1 (2) (2)(7)
+            //    //0荷主名_1FAX番号_2タイムスタンプ_3受注ID_4開始日_5終了日_6担当区分_7備考_8金額_9ページ
+            //    foreach (var archiveInfo in archiveInfos)
+            //    {
+            //        var dir = Path.GetDirectoryName(archiveInfo.FullPath);
+            //        var fname = Path.GetFileNameWithoutExtension(archiveInfo.FullPath);
+            //        var ext = Path.GetExtension(archiveInfo.FullPath);
+            //        var fNameArry = fname.Split('_');
+            //        fNameArry[7] = archiveInfo.Amount.ToString();
+            //        var newFileName = "";
+            //        for(int j = 0; j < 8; j++)
+            //        {
+            //            newFileName += "_" + fNameArry[j];
+            //        }
+            //        newFileName = newFileName + "_" + archiveInfo.Amount.ToString();
+            //        newFileName = newFileName.Substring(2);
+
+            //        var directoryTo = _setting.アーカイブ先 + @"\" + fNameArry[0] + @"\" + fNameArry[6];
+            //        if (fNameArry[6] == "4.倉庫保管")
+            //        {
+            //            directoryTo += @"\" + fNameArry[7];
+            //        }
+            //        if (fNameArry[4] != "" && fNameArry[5] != "")
+            //        {
+            //            directoryTo += @"\" + fNameArry[4].Substring(0, 6);
+            //            if (fNameArry[4].Substring(0, 6) != fNameArry[5].Substring(0, 6))
+            //            {
+            //                directoryTo += "-" + fNameArry[5].Substring(0, 6);
+            //            }
+            //        }
+                    
+            //        if (!Directory.Exists(directoryTo))
+            //        {
+            //            Directory.CreateDirectory(directoryTo);
+            //        }
+
+            //        var newPath = directoryTo + @"\" + newFileName + ext;
+            //        int i = 0;
+            //        while (File.Exists(newPath))
+            //        {
+            //            newPath = directoryTo + @"\" + newFileName + "(" + i.ToString() + ")" + ext;
+            //            i++;
+            //        }
+
+            //        try
+            //        {
+            //            //await IndexService.UpdateFullPath(Convert.ToDecimal(tranceferFileInfo.受注CD), newPath);
+
+            //            FileInfo fileInfo = new FileInfo(archiveInfo.FullPath);
+            //            ////fileInfo.CopyTo(newTfPath);
+            //            fileInfo.MoveTo(newPath);
+            //        }
+            //        catch (Exception e)
+            //        {
+            //            Console.WriteLine(e);
+            //        }
+
+
+
+            //    }
+            //}
+
+
+
+
             await this.AddSystemLog($"終了{DateTime.Now.ToString()} 処理{syoriCount.ToString()} 残{zanCount.ToString()}");
         }
+
+
+
+
+
 
     
 
@@ -866,7 +972,7 @@ namespace WindowsFormsApp2
             this.txtFull表示.Text = result;
         }
 
-
+        
 
 
 
