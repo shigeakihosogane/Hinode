@@ -12,9 +12,8 @@ namespace FileTransfer2ForBlazor.Models
 
         public string TfUploader { get; set; } = "";
         public string ArchiveFolder { get; set; } = "";
-        public int TransferQueueTime { get; set; } = 0;
-        
-
+        public string FileListFolder { get; set; } = "";
+        public int TransferQueueTime { get; set; } = 0;        
         public int MonitoringInterval { get; set; } = 1000;
         public DateTime ScheduledExecutionTime {  get; set; } = DateTime.MinValue;
 

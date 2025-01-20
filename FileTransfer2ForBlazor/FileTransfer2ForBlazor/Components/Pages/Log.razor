@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Diagnostics
+@inherits LayoutComponentBase
 <h3>Log</h3>
 
 <RadzenTabs TabPosition="@tabPosition" RenderMode="TabRenderMode.Client" >
@@ -6,15 +7,15 @@
         <!-- ファイル転送履歴タブ -->
         <RadzenTabsItem Text="ファイル転送履歴">
             <div class="data-grid-wrapper">
-                <RadzenDataGrid AllowColumnResize="true"  Style="height:460px"
-                                Data="@fileTranceferLogs" TItem="FileTranceferLog">
+                <RadzenDataGrid AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
+                Data="@fileTranceferLogs" TItem="FileTranceferLog">
                     <Columns>
                         <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" />
                         <RadzenDataGridColumn Property="Process" Title="処理" Width="80px" />
                         <RadzenDataGridColumn Property="Result" Title="結果" Width="80px" />
-                        <RadzenDataGridColumn Title="ファイル名" Width="600px">
-                            <Template Context="data">
-                                @Path.GetFileName(data.FullPathBeforeTransfer)
+                        <RadzenDataGridColumn Title="出力ファイル名" Width="600px">
+                            <Template Context="data">                                
+                                @Path.GetFileName(data.FullPathAfterTransfer)                                
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Title="転送先" Width="400px">
@@ -23,6 +24,11 @@
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Property="ProcessedDateTime" Title="処理日時" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
+                        <RadzenDataGridColumn Title="入力ファイル名" Width="400px">
+                            <Template Context="data">
+                                @Path.GetFileName(data.FullPathBeforeTransfer)
+                            </Template>
+                        </RadzenDataGridColumn>
                     </Columns>
                 </RadzenDataGrid>
             </div>
@@ -31,32 +37,67 @@
         <!-- アーカイブ履歴タブ -->
         <RadzenTabsItem Text="アーカイブ履歴">
             <div class="data-grid-wrapper">
-                <RadzenDataGrid AllowColumnResize="true" Style="height:460px;  "
-                                Data="@fileTransferHistorys" TItem="FileTransferHistory">
+                <RadzenDataGrid　@ref =grid FilterMode="FilterMode.Simple" AllowFiltering="true" AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
+                Data="@fileTransferHistorys" TItem="FileTransferHistory">
                     <Columns>
-                        <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" />
-                        <RadzenDataGridColumn Property="ZyutyuuID" Title="受注ID" Width="100px" />
-                        <RadzenDataGridColumn Title="ファイル名" Width="600px">
+                        <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" Filterable="false" />
+                        <RadzenDataGridColumn Property="ZyutyuuID" Title="受注ID" Width="100px"  />
+                        <RadzenDataGridColumn Title="ファイル名" Width="600px" Filterable="true">
                             <Template Context="data">
-                                @Path.GetFileName(data.DefaultFullPath)
+                                @if (data.ArchiveTime == null)
+                                {
+                                    <a href="#" @onclick="() => OpenFileWithAppBasedOnExtension(data.TemporaryStorageFullPath)">
+                                        @Path.GetFileName(data.TemporaryStorageFullPath)
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" @onclick="() => OpenFileWithAppBasedOnExtension(data.ArchiveFullPath)">
+                                        @Path.GetFileName(data.ArchiveFullPath)
+                                    </a>
+                                }                                
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="一時保管" Width="450px">
+                        <RadzenDataGridColumn Title="保管場所" Width="450px">
                             <Template Context="data">
-                                @Path.GetDirectoryName(data.TemporaryStorageFullPath)
+                                @if (data.ArchiveTime == null)
+                                {
+                                    @Path.GetDirectoryName(data.TemporaryStorageFullPath)
+                                }
+                                else
+                                {
+                                    @Path.GetDirectoryName(data.ArchiveFullPath)
+                                }                                
                             </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="TemporaryStorageTime" Title="一時保管時間" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
+                        </RadzenDataGridColumn>                        
+                        <RadzenDataGridColumn Title="処理時間" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}">
+                            <Template Context="data">
+                                @if (data.ArchiveTime == null)
+                                {
+                                    @data.TemporaryStorageTime
+                                }
+                                else
+                                {
+                                    @data.ArchiveTime
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>                        
                         <RadzenDataGridColumn Property="TemporaryStorageLimit" Title="一時保管期限" Width="90px" FormatString="{0:yyyy-MM-dd}" />
-                        <RadzenDataGridColumn Title="アーカイブ" Width="450px">
+                        @* <RadzenDataGridColumn Title="アーカイブ" Width="450px">
                             <Template Context="data">
                                 @Path.GetDirectoryName(data.ArchiveFullPath)
                             </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="ArchiveTime" Title="アーカイブ時間" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
+                        </RadzenDataGridColumn> *@
+                        @* <RadzenDataGridColumn Property="ArchiveTime" Title="アーカイブ時間" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" /> *@
                         <RadzenDataGridColumn Property="OrderAmount" Title="受注金額" Width="100px" />
                     </Columns>
-                </RadzenDataGrid>
+                </RadzenDataGrid　>
+            </div>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="検索">
+            <div style="width: auto; height: calc(100vh - 200px);"> 
+
+
             </div>
         </RadzenTabsItem>
     </Tabs>
@@ -68,6 +109,7 @@
     [Parameter]public List<FileTranceferLog>? fileTranceferLogs{ get; set; }
 
     TabPosition tabPosition = TabPosition.Top;
+    RadzenDataGrid<FileTransferHistory> grid;
 
     protected override void OnParametersSet()
     {
@@ -80,5 +122,62 @@
             fileTransferHistorys = fileTransferHistorys.OrderByDescending(h => h.Id).ToList();
         }
     }
+
+    private static void OpenFileWithAppBasedOnExtension(string filePath)
+    {
+        // 拡張子とアプリケーションのマッピング
+        var appMapping = new Dictionary<string, string>
+        {
+            { ".txt", @"C:\Windows\System32\notepad.exe" }, // メモ帳
+            { ".csv", @"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE" }, // Excel
+            { ".pdf", @"C:\Program Files\Canon\Desktop\iWDT.Editor.Integrate.EditorProcess.exe" }, // Adobe Acrobat
+            { ".jpg", @"C:\Windows\System32\mspaint.exe" }, // ペイント
+            { ".png", @"C:\Windows\System32\mspaint.exe" }, // ペイント
+            { ".mp4", @"C:\Program Files\VideoLAN\VLC\vlc.exe" } // VLC メディアプレーヤー
+        };
+
+        try
+        {
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine($"ファイルが見つかりません: {filePath}");
+                return;
+            }
+
+            // ファイルの拡張子を取得
+            string extension = Path.GetExtension(filePath).ToLower();
+
+            if (appMapping.ContainsKey(extension))
+            {
+                string appPath = appMapping[extension];
+
+                if (File.Exists(appPath))
+                {
+                    // アプリケーションを指定してファイルを開く
+                    Process.Start(new ProcessStartInfo
+                        {
+                            FileName = appPath,
+                            Arguments = $"\"{filePath}\"", // ファイルパスを引数として渡す
+                            UseShellExecute = false // シェルを使わずにプロセスを開始
+                        });
+                    Console.WriteLine($"アプリケーションでファイルを開きました: {appPath}");
+                }
+                else
+                {
+                    Console.WriteLine($"指定されたアプリケーションが見つかりません: {appPath}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"この拡張子に対応するアプリケーションが見つかりません: {extension}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ファイルを開く際にエラーが発生しました: {ex.Message}");
+        }
+    }
+
+
 
 }

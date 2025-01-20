@@ -4,6 +4,9 @@
 @inject FileTranceferLogService FileTranceferLogService
 @inject SharedService SharedService
 @inject ArchiveService ArchiveService
+@inject NotificationService NotificationService
+@inject MotherboardIDService MotherboardIDService
+
 <RadzenLayout >
     <!-- Header -->
     <RadzenHeader>
@@ -24,32 +27,34 @@
         @* <div class="rz-p-4">
             Sidebar
         </div> *@
-        <RadzenBody >
+        <div style="margin-top:80px; text-align: center;">
             <RadzenSelectBar Size="ButtonSize.Large" Value="@_isRun" TValue="bool" Change="OnSelectBarChange">
                 <Items>
                     <RadzenSelectBarItem Text="IDLE" Value="false" />
                     <RadzenSelectBarItem Text="RUN" Value="true" />
                 </Items>
             </RadzenSelectBar>
-        </RadzenBody>
-
-        <p>@testString</p>
+        </div>      
 
     </RadzenSidebar>
 
     <!-- Body -->
-    <RadzenBody class="rz-p-4">
+    <RadzenBody class="rz-p-4" style="height:auto">
         <div style="overflow-x:hidden; overflow-y:hidden;">
             @BodyContent
         </div>
     </RadzenBody>
 </RadzenLayout>
 <RadzenComponents />
+<RadzenButton Click=@(args => OnClick()) Text="保存" ButtonStyle="ButtonStyle.Secondary" />
+<p>@testString</p>
+
 
 
 @code {
     private bool _isRun; 
-    private Setting _setting = new Setting();
+    private Setting _setting = new();
+    private string _serialNumber = "";
     private List<FileTransferHistory> _fileTransferHistorys = new List<FileTransferHistory>();
     private List<FileTranceferLog> _fileTranceferLogs = new List<FileTranceferLog>();
 
@@ -58,16 +63,19 @@
     private RenderFragment BodyContent => GetBodyContent(); // RenderFragment型のプロパティを利用
 
 
+
     private Timer? _mainTimer;
     private DateTime? _mainTimerStartDateTime;
     private int _mainTimerElapsedTime;
-    private string _mainTimerStatus = "";
+    private string _mainTimerStatus = "停止中";
 
     private Timer? _archiveTimer;
     private DateTime _nextExecutionTime;
     private DateTime? _lastExecutionTime;
     private TimeSpan _scheduledTime;
     private int _archiveProcessedCount = 0;
+    private int _temporaryStorageTotalCount = 0;
+
 
 
     private string testString = "";
@@ -76,8 +84,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _isRun = false;//初期常態IDLE
-        _setting = await SettingService.GetSetting();
+        _serialNumber = MotherboardIDService.GetMotherboardSerialNumber();
+        testString = _serialNumber;
+        await this.GetSetting(_serialNumber);
+
+        _isRun = false;//初期常態IDLE  
         _scheduledTime = new TimeSpan(_setting.ScheduledExecutionTime.Hour, _setting.ScheduledExecutionTime.Minute, _setting.ScheduledExecutionTime.Second); // 実行時刻
 
         await this.GetFileTransferHistory();
@@ -85,9 +96,13 @@
 
         SharedService.OnInsertFileTranceferLog += GetFileTranceferLog;
         SharedService.OnInsertFileTransferHistory += GetFileTransferHistory;
-        
+
         ScheduleDailyExecution();
 
+    }
+    private async Task GetSetting(string serialNumber)
+    {
+        _setting = await SettingService.GetSetting(serialNumber);            
     }
 
     private async Task GetFileTransferHistory()
@@ -107,7 +122,17 @@
         _archiveTimer?.Dispose();
 
     }
-
+    private void ShowNotification(string text)
+    {
+        NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "通知",
+                    Detail = text,
+                    Duration = 4000
+                });
+        StateHasChanged();
+    }
     private void SelectMenuItem(string menuItem)//
     {
         selectedMenuItem = menuItem;
@@ -118,9 +143,10 @@
         {
             "Home" => @<Home isRun="@_isRun" OnIsRunChanged="UpdateIsRun" />,
             "Status" => @<Status isRun="@_isRun" mainTimerStartDateTime="@_mainTimerStartDateTime" mainTimerElapsedTime="@_mainTimerElapsedTime" mainTimerStatus="@_mainTimerStatus"
-                        nextExecutionTime="@_nextExecutionTime" lastExecutionTime="@_lastExecutionTime" archiveProcessedCount="@_archiveProcessedCount" OnRunArchiveNow="ExecuteDailyTask" />,
+        nextExecutionTime="@_nextExecutionTime" lastExecutionTime="@_lastExecutionTime" archiveProcessedCount="@_archiveProcessedCount" temporaryStorageTotalCount="@_temporaryStorageTotalCount"
+                        OnRunArchiveNow="ExecuteDailyTask" />,
             "Log" => @<Log fileTransferHistorys="@_fileTransferHistorys" fileTranceferLogs="@_fileTranceferLogs" />,
-            "Settings" => @<Settings setting="@_setting" isRun="@_isRun" OnIsRunChanged="UpdateIsRun" />,
+            "Settings" => @<Settings setting="@_setting" isRun="@_isRun" OnIsRunChanged="UpdateIsRun" OnSettingChanged="SaveSetting" />,
             _ => @<p>Unknown Page</p>
         };
     }    
@@ -137,8 +163,9 @@
     {
         _isRun = newValue;
         if (_isRun)
-        {
+        {            
             var emsg = "";//ディレクトリ存在チェック
+            if (_setting==null) emsg += "初期セッティングを行ってください。";
             if (!Directory.Exists(_setting.Trans1Monitoring)) emsg += "監視1ディレクトリなし ";
             if (!Directory.Exists(_setting.Trans1Successful)) emsg += "成功1ディレクトリなし ";
             if (!Directory.Exists(_setting.Trans2Monitoring)) emsg += "監視2ディレクトリなし ";
@@ -158,6 +185,7 @@
         else // false の場合は停止
         {
             StopMonitoring(); // フォルダ監視を停止
+            _mainTimerStatus = "停止中";
         }
 
         StateHasChanged(); // 状態を更新してUIを再レンダリング
@@ -166,7 +194,8 @@
     private void StartMonitoring()
     {
         _mainTimer = new Timer(CheckFolder, null, 0, _setting.MonitoringInterval);
-        _mainTimerStartDateTime = DateTime.Now;        
+        _mainTimerStartDateTime = DateTime.Now;   
+        ShowNotification("フォルダ監視を開始しました。");
     }
     private void StopMonitoring()
     {
@@ -174,6 +203,7 @@
         _mainTimer = null;
         _mainTimerStartDateTime = null;
         _mainTimerElapsedTime = 0;
+        ShowNotification("フォルダ監視を停止しました。");
     }
 
     private async void CheckFolder(object? state)
@@ -227,9 +257,9 @@
     {        
         // 実行処理
         _archiveProcessedCount = await ArchiveService.ArchiveProcessedFile();
-                
+        _temporaryStorageTotalCount = await ArchiveService.GetTemporaryStorageTotalCountAsync(_setting.Trans2Successful);
         _lastExecutionTime = DateTime.Now;
-        testString = $"[{DateTime.Now}] 日次処理を実行しました。:{_archiveProcessedCount}件";
+        ShowNotification($"[{DateTime.Now}] 日次処理を実行しました。処理: {_archiveProcessedCount}件、残: {_temporaryStorageTotalCount}件");        
         await InvokeAsync(StateHasChanged);
 
         // 次回実行時刻をスケジュール
@@ -239,10 +269,20 @@
 
 
 
+    private async Task SaveSetting(Setting newSetting)
+    {
+        await SettingService.SaveSettingAsync(_serialNumber,newSetting);
+        await this.GetSetting(_serialNumber);
+        this.ExecuteDailyTask(null);
+    }
 
 
 
 
+
+    private void OnClick()
+    {        
+    }
 
 
 

@@ -3,7 +3,7 @@ namespace FileTransfer2ForBlazor.Services
 {
     public class FolderPickerService
     {
-        public async Task<string> GetFolderPathAsync()
+        public async Task<string> GetFolderPathAsync(string selectedPath)
         {
             return await Task.Run(() =>
             {
@@ -16,7 +16,7 @@ namespace FileTransfer2ForBlazor.Services
                     {
                         using var fbd = new FolderBrowserDialog();
                         fbd.Description = "フォルダを指定してください。";
-                        fbd.SelectedPath = @"C:\Windows";
+                        fbd.SelectedPath = selectedPath;
                         if (fbd.ShowDialog() == DialogResult.OK)
                         {
                             result = fbd.SelectedPath;

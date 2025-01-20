@@ -17,15 +17,17 @@ namespace FileTransfer2ForBlazor.Services
     public class FileTransferService
     {  
         private readonly SettingService _settingService;
+        private readonly string _serialNumber;
         private readonly IndexService _indexService;
         private readonly NinusiInfoService _ninusiInfoService;
         private readonly FileTransferHistoryService _fileTransferHistoryService;
         private readonly FileTranceferLogService _fileTranceferLogService;
 
-        public FileTransferService(SettingService settingService, IndexService indexService, NinusiInfoService ninusiInfoService,
+        public FileTransferService(SettingService settingService, IndexService indexService, NinusiInfoService ninusiInfoService, MotherboardIDService motherboardIDService,
             FileTransferHistoryService fileTransferHistoryService, FileTranceferLogService fileTranceferLogService)
         {
             _settingService = settingService;
+            _serialNumber = motherboardIDService.GetMotherboardSerialNumber();
             _indexService = indexService;
             _ninusiInfoService = ninusiInfoService;
             _fileTransferHistoryService = fileTransferHistoryService;
@@ -35,7 +37,7 @@ namespace FileTransfer2ForBlazor.Services
 
         public async Task AtherFileFormat(string file)
         {
-            var setting = await _settingService.GetSetting();                           
+            var setting = await _settingService.GetSetting(_serialNumber);                           
             var fullPath = Path.GetFullPath(file);
             var fileName = Path.GetFileNameWithoutExtension(file);
             var extensionName = Path.GetExtension(file);
@@ -296,7 +298,7 @@ namespace FileTransfer2ForBlazor.Services
 
         private async Task MoveToSuccessDirectory(FileNameElement fileNameElement, FileTransferHistory fileTransferHistory, FileTranceferLog fileTranceferLog)
         {
-            var setting = await _settingService.GetSetting();//           
+            var setting = await _settingService.GetSetting(_serialNumber);//           
             var directoryTo = setting.Trans2Successful + @"\" + fileNameElement.荷主名 + @"\" + fileNameElement.担当部署;
             if (fileNameElement.担当部署 == "4.倉庫保管")
             {
@@ -365,7 +367,7 @@ namespace FileTransfer2ForBlazor.Services
         }
         private async Task MoveToErrorDirectory(string fullPath, string emsg, FileTranceferLog fileTranceferLog)
         {
-            var setting = await _settingService.GetSetting();//
+            var setting = await _settingService.GetSetting(_serialNumber);//
             var fileName = Path.GetFileNameWithoutExtension(fullPath);
             var extensionName = Path.GetExtension(fullPath);
             //this.txtAPPログ.Text += "\r\n" + file;
@@ -421,7 +423,7 @@ namespace FileTransfer2ForBlazor.Services
 
         private async Task<DateTime> GetTemporaryStorageLimit(DateTime defaultDate, int cutOfDate)
         {
-            var setting = await _settingService.GetSetting();
+            var setting = await _settingService.GetSetting(_serialNumber);
             var transferQueueTime = setting.TransferQueueTime;
             if (cutOfDate == 31 || cutOfDate == 0)//末締め
             {

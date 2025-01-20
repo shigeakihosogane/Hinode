@@ -1,13 +1,16 @@
-﻿using FileTransfer2ForBlazor.Models;
+﻿using FileTransfer2ForBlazor.Components.Pages;
+using FileTransfer2ForBlazor.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace FileTransfer2ForBlazor.Services
 {
@@ -15,13 +18,15 @@ namespace FileTransfer2ForBlazor.Services
     {
         private readonly string _connectionString;
         private readonly SettingService _settingService;
+        private readonly string _serialNumber;
         private readonly FileTransferHistoryService _fileTransferHistoryService;
         private readonly FileTranceferLogService _fileTranceferLogService;
-        public ArchiveService(DBConnection connection, SettingService settingService,
+        public ArchiveService(DBConnection connection, SettingService settingService, MotherboardIDService motherboardIDService,
             FileTransferHistoryService fileTransferHistoryService, FileTranceferLogService fileTranceferLogService)
         {
             _connectionString = connection.GetConnectionString();
-            _settingService = settingService;            
+            _settingService = settingService;
+            _serialNumber = motherboardIDService.GetMotherboardSerialNumber();
             _fileTransferHistoryService = fileTransferHistoryService;
             _fileTranceferLogService = fileTranceferLogService;
         }
@@ -63,7 +68,7 @@ WHERE                       (TemporaryStorageLimit IS NOT NULL) AND (TemporarySt
 
                             var fileTranceferLog = new FileTranceferLog
                             {
-                                Process = "アーカイブ",
+                                Process = "最終保管",
                                 FullPathBeforeTransfer = fileTransferHistory.TemporaryStorageFullPath
                             };
 
@@ -113,7 +118,7 @@ WHERE                       (TemporaryStorageLimit IS NOT NULL) AND (TemporarySt
             }
             else
             {                
-                var setting = await _settingService.GetSetting();
+                var setting = await _settingService.GetSetting(_serialNumber);
                 var directoryTo = setting.ArchiveFolder;
                 var fullPath = Path.GetFullPath(fileTransferHistory.TemporaryStorageFullPath);
                 var fileName = Path.GetFileNameWithoutExtension(fullPath);
@@ -181,6 +186,105 @@ WHERE                       (TemporaryStorageLimit IS NOT NULL) AND (TemporarySt
             
         }
 
+
+
+
+
+
+
+
+        public async Task<int> GetTemporaryStorageTotalCountAsync(string rootPath)
+        {            
+            string tempFilePath = Path.GetTempFileName();
+            int result = 0;
+            try
+            {
+                // 一時ファイルにフォルダパスを書き出す（非同期）
+                using (StreamWriter writer = new(tempFilePath))
+                {
+                    await foreach (var dir in GetDirectoriesStreamAsync(rootPath))
+                    {
+                        await writer.WriteLineAsync(dir);
+                    }
+                }
+
+                Console.WriteLine($"フォルダパスを書き出しました: {tempFilePath}");
+
+                var setting = await _settingService.GetSetting(_serialNumber);
+                var targetFolder = setting.FileListFolder;
+                var filePrefix = "ファイルリスト_";
+                var ts = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+                var fileName = $"{filePrefix}{ts}.csv";
+                var fullPath = Path.Combine(targetFolder, fileName);
+
+                // 一時ファイルからフォルダパスを読み込み、ファイル数をカウント（非同期）
+                using StreamReader reader = new(tempFilePath);
+                string folderPath;
+
+                using (var writer = new StreamWriter(fullPath,false, Encoding.GetEncoding("Shift_JIS")))
+                {
+                    writer.WriteLine("ファイル数,フォルダパス");
+                    while ((folderPath = await reader.ReadLineAsync()) != null)
+                    {
+                        int fileCount = await GetFileCountAsync(folderPath);
+                        writer.WriteLine($"{fileCount},{folderPath}");
+                        Console.WriteLine($"Folder: {folderPath}, File Count: {fileCount}");
+                        result += fileCount;
+                    }
+                }
+            }
+            finally
+            {
+                // 一時ファイルを削除
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                    Console.WriteLine("一時ファイルを削除しました。");
+                }
+            }
+            return result;
+        }
+
+        private static async IAsyncEnumerable<string> GetDirectoriesStreamAsync(string path)
+        {
+            Queue<string> directories = new();
+            directories.Enqueue(path);
+
+            while (directories.Count > 0)
+            {
+                string currentDir = directories.Dequeue();
+                yield return currentDir;
+
+                string[] subDirs;
+                try
+                {
+                    subDirs = await Task.Run(() => Directory.GetDirectories(currentDir));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error accessing {currentDir}: {ex.Message}");
+                    continue;
+                }
+
+                foreach (var subDir in subDirs)
+                {
+                    directories.Enqueue(subDir);
+                }
+            }
+        }
+
+        private static async Task<int> GetFileCountAsync(string folderPath)
+        {
+            try
+            {
+                return await Task.Run(() => Directory.GetFiles(folderPath).Length);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error counting files in {folderPath}: {ex.Message}");
+                return 0;
+            }
+        }
 
 
 

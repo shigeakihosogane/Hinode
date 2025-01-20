@@ -78,28 +78,26 @@ FROM                         dbo.T_TF_D_FileTranceferLog";
                 try
                 {
                     await connection.OpenAsync();
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using var reader = await command.ExecuteReaderAsync();
+                    try
                     {
-                        try
+                        while (await reader.ReadAsync())
                         {
-                            while (await reader.ReadAsync())
+                            var fileTranceferLog = new FileTranceferLog
                             {
-                                var fileTranceferLog = new FileTranceferLog
-                                {
-                                    Id = Convert.ToInt32(reader["Id"]),
-                                    Process = Convert.ToString(reader["Process"]) ?? "",
-                                    Result = Convert.ToString(reader["Result"]) ?? "",
-                                    FullPathBeforeTransfer = Convert.ToString(reader["FullPathBeforeTransfer"]) ?? "",
-                                    FullPathAfterTransfer = Convert.ToString(reader["FullPathAfterTransfer"]) ?? "",
-                                    ProcessedDateTime = reader["ProcessedDateTime"] != DBNull.Value ? Convert.ToDateTime(reader["ProcessedDateTime"]) : null,
-                                };
-                                fileTranceferLogs.Add(fileTranceferLog);
-                            }
+                                Id = Convert.ToInt32(reader["Id"]),
+                                Process = Convert.ToString(reader["Process"]) ?? "",
+                                Result = Convert.ToString(reader["Result"]) ?? "",
+                                FullPathBeforeTransfer = Convert.ToString(reader["FullPathBeforeTransfer"]) ?? "",
+                                FullPathAfterTransfer = Convert.ToString(reader["FullPathAfterTransfer"]) ?? "",
+                                ProcessedDateTime = reader["ProcessedDateTime"] != DBNull.Value ? Convert.ToDateTime(reader["ProcessedDateTime"]) : null,
+                            };
+                            fileTranceferLogs.Add(fileTranceferLog);
                         }
-                        catch (SqlException ex)
-                        {
-                            Console.WriteLine("SQLエラー: " + ex.Message);
-                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        Console.WriteLine("SQLエラー: " + ex.Message);
                     }
                 }
                 catch (SqlException ex)
