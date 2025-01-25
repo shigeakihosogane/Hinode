@@ -22,6 +22,20 @@ namespace FileTransfer2ForBlazor.Services
             return _connectionString; 
         }
 
+        public async Task<bool> CheckDatabaseConnection()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                await connection.OpenAsync();
+                return true; // 接続成功
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"接続エラー: {ex.Message}");
+                return false; // 接続失敗
+            }
+        }
 
 
 

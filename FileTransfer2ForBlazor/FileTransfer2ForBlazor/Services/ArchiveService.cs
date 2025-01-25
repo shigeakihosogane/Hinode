@@ -20,15 +20,15 @@ namespace FileTransfer2ForBlazor.Services
         private readonly SettingService _settingService;
         private readonly string _serialNumber;
         private readonly FileTransferHistoryService _fileTransferHistoryService;
-        private readonly FileTranceferLogService _fileTranceferLogService;
+        private readonly FileTransferLogService _fileTransferLogService;
         public ArchiveService(DBConnection connection, SettingService settingService, MotherboardIDService motherboardIDService,
-            FileTransferHistoryService fileTransferHistoryService, FileTranceferLogService fileTranceferLogService)
+            FileTransferHistoryService fileTransferHistoryService, FileTransferLogService fileTransferLogService)
         {
             _connectionString = connection.GetConnectionString();
             _settingService = settingService;
             _serialNumber = motherboardIDService.GetMotherboardSerialNumber();
             _fileTransferHistoryService = fileTransferHistoryService;
-            _fileTranceferLogService = fileTranceferLogService;
+            _fileTransferLogService = fileTransferLogService;
         }
 
 
@@ -66,13 +66,13 @@ WHERE                       (TemporaryStorageLimit IS NOT NULL) AND (TemporarySt
                             };
                             result++;
 
-                            var fileTranceferLog = new FileTranceferLog
+                            var fileTransferLog = new FileTransferLog
                             {
                                 Process = "最終保管",
                                 FullPathBeforeTransfer = fileTransferHistory.TemporaryStorageFullPath
                             };
 
-                            await this.MoveToArchive(fileTransferHistory, fileTranceferLog);
+                            await this.MoveToArchive(fileTransferHistory, fileTransferLog);
                         }
                     }
                     catch (SqlException ex)
@@ -106,7 +106,7 @@ WHERE                       (TemporaryStorageLimit IS NOT NULL) AND (TemporarySt
 
 
 
-        private async Task MoveToArchive(FileTransferHistory fileTransferHistory, FileTranceferLog fileTranceferLog)
+        private async Task MoveToArchive(FileTransferHistory fileTransferHistory, FileTransferLog fileTransferLog)
         {
             string result;
             string newPath;
@@ -169,10 +169,10 @@ WHERE                       (TemporaryStorageLimit IS NOT NULL) AND (TemporarySt
             try
             {
                 var ts = DateTime.Now;
-                fileTranceferLog.Result = result;                
-                fileTranceferLog.FullPathAfterTransfer = newPath;
-                fileTranceferLog.ProcessedDateTime = ts;
-                await _fileTranceferLogService.InsertFileTranceferLogAsync(fileTranceferLog);
+                fileTransferLog.Result = result;
+                fileTransferLog.FullPathAfterTransfer = newPath;
+                fileTransferLog.ProcessedDateTime = ts;
+                await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);
 
                 fileTransferHistory.ArchiveFullPath = newPath;
                 fileTransferHistory.ArchiveTime = ts;

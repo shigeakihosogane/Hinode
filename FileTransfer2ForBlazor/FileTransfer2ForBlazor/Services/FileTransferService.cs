@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FileTransfer2ForBlazor.Components.Pages;
 using FileTransfer2ForBlazor.Models;
+using ImageMagick;
 using Microsoft.VisualBasic.Logging;
 using Index = FileTransfer2ForBlazor.Models.Index;
 
@@ -15,27 +16,31 @@ using Index = FileTransfer2ForBlazor.Models.Index;
 namespace FileTransfer2ForBlazor.Services
 {
     public class FileTransferService
-    {  
+    {
         private readonly SettingService _settingService;
         private readonly string _serialNumber;
         private readonly IndexService _indexService;
         private readonly NinusiInfoService _ninusiInfoService;
         private readonly FileTransferHistoryService _fileTransferHistoryService;
-        private readonly FileTranceferLogService _fileTranceferLogService;
+        private readonly FileTransferLogService _fileTransferLogService;
+        private readonly ThereforeLogService _thereforeLogService;
+        private readonly FileRegistryService _fileRegistryService;
 
         public FileTransferService(SettingService settingService, IndexService indexService, NinusiInfoService ninusiInfoService, MotherboardIDService motherboardIDService,
-            FileTransferHistoryService fileTransferHistoryService, FileTranceferLogService fileTranceferLogService)
+            FileTransferHistoryService fileTransferHistoryService, FileTransferLogService fileTransferLogService, ThereforeLogService thereforeLogService, FileRegistryService fileRegistryService)
         {
             _settingService = settingService;
             _serialNumber = motherboardIDService.GetMotherboardSerialNumber();
             _indexService = indexService;
             _ninusiInfoService = ninusiInfoService;
             _fileTransferHistoryService = fileTransferHistoryService;
-            _fileTranceferLogService = fileTranceferLogService;
+            _fileTransferLogService = fileTransferLogService;
+            _thereforeLogService = thereforeLogService;
+            _fileRegistryService = fileRegistryService;
         }
 
 
-        public async Task AtherFileFormat(string file)
+        public async Task AtherFileFormat(string file,bool cubeState)
         {
             var setting = await _settingService.GetSetting(_serialNumber);                           
             var fullPath = Path.GetFullPath(file);
@@ -46,7 +51,7 @@ namespace FileTransfer2ForBlazor.Services
             //this.txtAPPログ.Text += "\r\n" + fullPath;
             //this.txtAPPログ.Text += "\r\n" + directoryName+ @"\" + fileName + extensionName;
 
-            var fileTranceferLog = new FileTranceferLog
+            var fileTransferLog = new FileTransferLog
             {
                 FullPathBeforeTransfer = fullPath,
                 Process = "取込処理"
@@ -73,10 +78,17 @@ namespace FileTransfer2ForBlazor.Services
             {
                 var fileInfo = new FileInfo(fullPath);
                 fileInfo.MoveTo(newFullPath);
-                fileTranceferLog.Result = "正常";
-                fileTranceferLog.ProcessedDateTime = DateTime.Now;
-                fileTranceferLog.FullPathAfterTransfer = newFullPath;
-                await _fileTranceferLogService.InsertFileTranceferLogAsync(fileTranceferLog);
+                fileTransferLog.Result = "正常";
+                fileTransferLog.ProcessedDateTime = DateTime.Now;
+                fileTransferLog.FullPathAfterTransfer = newFullPath;
+                await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);
+                //======================================================================================Therefore用転送
+                if (cubeState)//========================================================================
+                {//=====================================================================================
+                    await _thereforeLogService.AddThereforeLogAsync(fileTransferLog);//=================
+                }//=====================================================================================
+                //======================================================================================
+
             }
             catch (Exception e)
             {
@@ -89,7 +101,7 @@ namespace FileTransfer2ForBlazor.Services
 
 
 
-        public async Task GenerateFileNameWithIndex(string file)
+        public async Task GenerateFileNameWithIndex(string file, bool cubeState)
         {
             var fullPath = Path.GetFullPath(file);
             //var directoryName = Path.GetDirectoryName(file);
@@ -115,7 +127,7 @@ namespace FileTransfer2ForBlazor.Services
                 DefaultFullPath = fullPath,
                 OrderAmount = 0
             };
-            var fileTranceferLog = new FileTranceferLog
+            var fileTransferLog = new FileTransferLog
             {
                 FullPathBeforeTransfer = fullPath
             };
@@ -125,7 +137,7 @@ namespace FileTransfer2ForBlazor.Services
                 if (extensionName != ".pdf")
                 {
                     //戻し転送処理
-                    await this.MoveToErrorDirectory(fullPath, emsg, fileTranceferLog);                    
+                    await this.MoveToErrorDirectory(fullPath, emsg, fileTransferLog, cubeState);                    
                     return;
                 }
 
@@ -133,8 +145,8 @@ namespace FileTransfer2ForBlazor.Services
                 {
                     var index = new Index();
                     index = await _indexService.GetIndexAsync(zyutyuuID);
-                    fileTransferHistory.ZyutyuuID = zyutyuuID;                                      
-
+                    fileTransferHistory.ZyutyuuID = zyutyuuID;
+                    
                     //タイムスタンプ位置を取得
                     int len = fNameArray.Length;
                     int tsPosition;
@@ -159,7 +171,7 @@ namespace FileTransfer2ForBlazor.Services
                             {
                                 var ninusi = fNameArray[2];
                                 if (ninusi != "" && ninusi != "登録名称不明" && ninusi != "scan" && ninusi != "取込" && ninusi != "本社受信")
-                                {
+                                {                                    
                                     var sdate = DateTime.Now.ToString("yyyyMMdd");
                                     var edate = DateTime.Now.ToString("yyyyMMdd");
                                     var comment = fNameArray[1];
@@ -195,6 +207,15 @@ namespace FileTransfer2ForBlazor.Services
                                     fileNameElement.担当部署 = index.担当部署;
                                     fileNameElement.備考 = comment;
                                     fileNameElement.ページ = "";
+                                    fileTransferHistory.ConsignorID = index.荷主ID;
+                                    fileTransferHistory.ConsignorName = ninusi;
+                                    fileTransferHistory.FaxNumber = faxnumber;
+                                    fileTransferHistory.TimeStamp = fNameArray[4][..14];
+                                    fileTransferHistory.StartDate = DateTime.ParseExact(sdate, "yyyyMMdd", null);
+                                    fileTransferHistory.EndDate = DateTime.ParseExact(edate, "yyyyMMdd", null);
+                                    fileTransferHistory.Department = index.担当部署;
+                                    fileTransferHistory.Remarks = comment;
+                                    
 
                                     if (DateTime.TryParseExact(edate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime defaultDate))
                                     {
@@ -255,6 +276,14 @@ namespace FileTransfer2ForBlazor.Services
                                 fileNameElement.担当部署 = index.担当部署;
                                 fileNameElement.備考 = index.備考;
                                 fileNameElement.ページ = page;
+                                fileTransferHistory.ConsignorID = index.荷主ID;
+                                fileTransferHistory.ConsignorName = ninusi;
+                                fileTransferHistory.FaxNumber = faxnumber;
+                                fileTransferHistory.TimeStamp = fNameArray[3][..14];
+                                fileTransferHistory.StartDate = DateTime.ParseExact(index.開始日, "yyyyMMdd", null);
+                                fileTransferHistory.EndDate = DateTime.ParseExact(index.終了日, "yyyyMMdd", null);
+                                fileTransferHistory.Department = index.担当部署;
+                                fileTransferHistory.Remarks = index.備考;
 
                                 if (DateTime.TryParseExact(index.終了日, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime defaultDate))
                                 {
@@ -286,17 +315,17 @@ namespace FileTransfer2ForBlazor.Services
             if (emsg == "")
             {
                 //正常転送処理
-                await this.MoveToSuccessDirectory(fileNameElement, fileTransferHistory, fileTranceferLog);
+                await this.MoveToSuccessDirectory(fileNameElement, fileTransferHistory, fileTransferLog, cubeState);
             }
             else
             {
                 //エラー戻し転送
-                await this.MoveToErrorDirectory(fullPath, emsg, fileTranceferLog);
+                await this.MoveToErrorDirectory(fullPath, emsg, fileTransferLog, cubeState);
             }
         }
 
 
-        private async Task MoveToSuccessDirectory(FileNameElement fileNameElement, FileTransferHistory fileTransferHistory, FileTranceferLog fileTranceferLog)
+        private async Task MoveToSuccessDirectory(FileNameElement fileNameElement, FileTransferHistory fileTransferHistory, FileTransferLog fileTransferLog, bool cubeState)
         {
             var setting = await _settingService.GetSetting(_serialNumber);//           
             var directoryTo = setting.Trans2Successful + @"\" + fileNameElement.荷主名 + @"\" + fileNameElement.担当部署;
@@ -338,23 +367,45 @@ namespace FileTransfer2ForBlazor.Services
             try
             {
                 var fileInfo = new FileInfo(fileNameElement.元ファイルFullPath);
-                fileInfo.CopyTo(newTfPath);
-                fileInfo.MoveTo(newPath);
+                fileInfo.CopyTo(newTfPath);//===========================================================Therefore用転送
+                //######################################################################################本保存
+                fileInfo.MoveTo(newPath);//#############################################################
+                //######################################################################################
                 var dt = DateTime.Now;
-                fileTranceferLog.Result = "正常";
-                fileTranceferLog.ProcessedDateTime = dt;
+                fileTransferLog.Result = "正常";
+                fileTransferLog.ProcessedDateTime = dt;
                 //======================================================================================Therefore用転送
-                fileTranceferLog.Process = "Therefore";//===============================================
-                fileTranceferLog.FullPathAfterTransfer = newTfPath;//===================================
-                await _fileTranceferLogService.InsertFileTranceferLogAsync(fileTranceferLog);//=========
+                fileTransferLog.Process = "Therefore";//================================================
+                fileTransferLog.FullPathAfterTransfer = newTfPath;//====================================
+                await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);//===========
+                if(cubeState)//=========================================================================
+                {//=====================================================================================
+                    await _thereforeLogService.AddThereforeLogAsync(fileTransferLog);//=================
+                }//=====================================================================================
                 //======================================================================================
-                fileTranceferLog.Process = "一時保管";
-                fileTranceferLog.FullPathAfterTransfer = newPath;
-                await _fileTranceferLogService.InsertFileTranceferLogAsync(fileTranceferLog);
+                
+                fileTransferLog.Process = "一時保管";//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%FileTransferLog
+                fileTransferLog.FullPathAfterTransfer = newPath;//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);//%%%%%%%%%%%
+                fileTransferHistory.TemporaryStorageFullPath = newPath;//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                fileTransferHistory.TemporaryStorageTime = dt;//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                await _fileTransferHistoryService.InsertFileTransferHistoryAsync(fileTransferHistory);//
 
-                fileTransferHistory.TemporaryStorageFullPath = newPath;
-                fileTransferHistory.TemporaryStorageTime = dt;
-                await _fileTransferHistoryService.InsertFileTransferHistoryAsync(fileTransferHistory);
+                var fileRegistry = new FileRegistry//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&FileRegistry
+                {//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    FileFullPath = newPath,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    Thumbnail = this.GenerateThumbnail(newPath),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    CreatedDate = dt,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    ZyutyuuID = Convert.ToDecimal(fileNameElement.受注CD),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    ConsignorName = fileNameElement.荷主名,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    Department = fileNameElement.担当部署,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    StartDate = DateTime.Parse(fileNameElement.開始日),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    EndDate = DateTime.Parse(fileNameElement.終了日)//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&                  
+                };//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                await _fileRegistryService.InsertFileRegistryAsync(fileRegistry);//&&&&&&&&&&&&&&&&&&&&&
+                fileTransferLog.Process = "Registry";//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                fileTransferLog.FullPathAfterTransfer = newPath;//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);//&&&&&&&&&&&
 
             }
             catch (Exception e)
@@ -365,7 +416,7 @@ namespace FileTransfer2ForBlazor.Services
 
 
         }
-        private async Task MoveToErrorDirectory(string fullPath, string emsg, FileTranceferLog fileTranceferLog)
+        private async Task MoveToErrorDirectory(string fullPath, string emsg, FileTransferLog fileTransferLog, bool cubeState)
         {
             var setting = await _settingService.GetSetting(_serialNumber);//
             var fileName = Path.GetFileNameWithoutExtension(fullPath);
@@ -400,9 +451,15 @@ namespace FileTransfer2ForBlazor.Services
             {
                 var fileInfo = new FileInfo(fullPath);
                 fileInfo.MoveTo(newPath);
-                fileTranceferLog.Result = emsg;
-                fileTranceferLog.ProcessedDateTime = DateTime.Now;
-                await _fileTranceferLogService.InsertFileTranceferLogAsync(fileTranceferLog);                
+                fileTransferLog.Result = emsg;
+                fileTransferLog.ProcessedDateTime = DateTime.Now;
+                await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);
+                //======================================================================================Therefore用転送
+                if (cubeState)//========================================================================
+                {//=====================================================================================
+                    await _thereforeLogService.AddThereforeLogAsync(fileTransferLog);//=================
+                }//=====================================================================================
+                //======================================================================================
             }
             catch (Exception e)
             {
@@ -441,6 +498,16 @@ namespace FileTransfer2ForBlazor.Services
             }            
             return defaultDate.AddDays(transferQueueTime);
         }
+
+        public byte[] GenerateThumbnail(string pdfPath)
+        {
+            using var images = new MagickImageCollection();
+            images.Read(pdfPath);
+            var firstPage = images[0];// 最初のページを取得
+            firstPage.Resize(256, 256);// サムネイルサイズにリサイズ
+            return firstPage.ToByteArray(MagickFormat.Png);// サムネイルを PNG バイト配列として保存
+        }
+
 
 
 

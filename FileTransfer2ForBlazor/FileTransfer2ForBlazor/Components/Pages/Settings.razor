@@ -47,6 +47,15 @@ else
                         </RadzenStack>
                     </div>
                 </div>
+                <div style="margin-top:20px; margin-left:50px;">
+                    <h4>ログ</h4>
+                    <div style="margin-left:20px;">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap" style="margin-top:10px;">
+                            <RadzenLabel Text="取得件数" Component="LogRetrievalCount" Style="width:200px;" />
+                            <RadzenNumeric Step="100" @bind-Value=@_tempSetting.LogRetrievalCount InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "enter value" }})" Name="LogRetrievalCount" />
+                        </RadzenStack>
+                    </div>
+                </div>
             </ChildContent>
         </RadzenPanel>
 
@@ -133,7 +142,7 @@ else
     [Parameter] public bool isRun { get; set; }
     [Parameter] public EventCallback<bool> OnIsRunChanged { get; set; }
 
-    [Parameter] public Setting setting { get; set; } = null;
+    [Parameter] public Setting? setting { get; set; } = null;
     [Parameter] public EventCallback<Setting> OnSettingChanged { get; set; }
 
     private Setting _tempSetting = new Setting();
@@ -141,7 +150,10 @@ else
 
     protected override void OnParametersSet()
     {
-        _tempSetting = setting;
+        if(setting!=null)
+        {
+            _tempSetting = setting;
+        }
     }
 
     private async void GetFolderPath(string btntext, string selectedPath)

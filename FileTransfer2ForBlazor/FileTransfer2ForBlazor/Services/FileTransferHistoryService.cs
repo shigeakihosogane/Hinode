@@ -30,7 +30,15 @@ TemporaryStorageTime,
 TemporaryStorageLimit, 
 ArchiveFullPath, 
 ArchiveTime,
-OrderAmount
+OrderAmount,
+ConsignorID,
+ConsignorName,
+FaxNumber,
+TimeStamp,
+StartDate,
+EndDate,
+Department,
+Remarks
 ) VALUES (
 @ZyutyuuID, 
 @DefaultFullPath, 
@@ -39,7 +47,15 @@ OrderAmount
 @TemporaryStorageLimit, 
 @ArchiveFullPath, 
 @ArchiveTime,
-@OrderAmount
+@OrderAmount,
+@ConsignorID,
+@ConsignorName,
+@FaxNumber,
+@TimeStamp,
+@StartDate,
+@EndDate,
+@Department,
+@Remarks
 )";
             using (var connection = new SqlConnection(_connectionString))
             using (var command = new SqlCommand(sql, connection))
@@ -55,6 +71,15 @@ OrderAmount
                     command.Parameters.Add(new SqlParameter("@ArchiveFullPath", fileTransferHistory.ArchiveFullPath));
                     command.Parameters.Add(new SqlParameter("@ArchiveTime", (object?)fileTransferHistory.ArchiveTime ?? DBNull.Value));
                     command.Parameters.Add(new SqlParameter("@OrderAmount", fileTransferHistory.OrderAmount));
+                    command.Parameters.Add(new SqlParameter("@ConsignorID", fileTransferHistory.ConsignorID));
+                    command.Parameters.Add(new SqlParameter("@ConsignorName", fileTransferHistory.ConsignorName));
+                    command.Parameters.Add(new SqlParameter("@FaxNumber", fileTransferHistory.FaxNumber));
+                    command.Parameters.Add(new SqlParameter("@TimeStamp", fileTransferHistory.TimeStamp));
+                    command.Parameters.Add(new SqlParameter("@StartDate", (object?)fileTransferHistory.StartDate ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@EndDate", (object?)fileTransferHistory.EndDate ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@Department", fileTransferHistory.Department));
+                    command.Parameters.Add(new SqlParameter("@Remarks", fileTransferHistory.Remarks));
+
                     try
                     {
                         await command.ExecuteNonQueryAsync();
@@ -75,11 +100,12 @@ OrderAmount
 
 
 
-        public async Task<List<FileTransferHistory>> GetFileTransferHistoryAsync()
+        public async Task<List<FileTransferHistory>> GetFileTransferHistoryAsync(int logRetrievalCount)
         {
             var fileTransferHistorys = new List<FileTransferHistory>();
-            var sql = @"SELECT                      dbo.T_TF_D_FileTransferHistory.*
-FROM                         dbo.T_TF_D_FileTransferHistory";
+            var sql = $@"SELECT TOP {logRetrievalCount}                     dbo.T_TF_D_FileTransferHistory.*
+FROM                         dbo.T_TF_D_FileTransferHistory
+ORDER BY               Id DESC";
 
 
             using (var connection = new SqlConnection(_connectionString))
@@ -88,31 +114,37 @@ FROM                         dbo.T_TF_D_FileTransferHistory";
                 try
                 {
                     await connection.OpenAsync();                    
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using var reader = await command.ExecuteReaderAsync();
+                    try
                     {
-                        try
+                        while (await reader.ReadAsync())
                         {
-                            while (await reader.ReadAsync())
+                            var fileTransferHistory = new FileTransferHistory
                             {
-                                var fileTransferHistory = new FileTransferHistory
-                                {
-                                    Id = Convert.ToInt32(reader["Id"]),
-                                    ZyutyuuID = Convert.ToDecimal(reader["ZyutyuuID"]),
-                                    DefaultFullPath = Convert.ToString(reader["DefaultFullPath"]) ?? "",
-                                    TemporaryStorageFullPath = Convert.ToString(reader["TemporaryStorageFullPath"]) ?? "",
-                                    TemporaryStorageTime = reader["TemporaryStorageTime"] != DBNull.Value ? Convert.ToDateTime(reader["TemporaryStorageTime"]) : null,
-                                    TemporaryStorageLimit = reader["TemporaryStorageLimit"] != DBNull.Value ? Convert.ToDateTime(reader["TemporaryStorageLimit"]) : null,
-                                    ArchiveFullPath = Convert.ToString(reader["ArchiveFullPath"]) ?? "",
-                                    ArchiveTime = reader["ArchiveTime"] != DBNull.Value ? Convert.ToDateTime(reader["ArchiveTime"]) : null,
-                                    OrderAmount = Convert.ToDecimal(reader["OrderAmount"])
-                                };
-                                fileTransferHistorys.Add(fileTransferHistory);
-                            }
+                                Id = Convert.ToInt32(reader["Id"]),
+                                ZyutyuuID = Convert.ToDecimal(reader["ZyutyuuID"]),
+                                DefaultFullPath = Convert.ToString(reader["DefaultFullPath"]) ?? "",
+                                TemporaryStorageFullPath = Convert.ToString(reader["TemporaryStorageFullPath"]) ?? "",
+                                TemporaryStorageTime = reader["TemporaryStorageTime"] != DBNull.Value ? Convert.ToDateTime(reader["TemporaryStorageTime"]) : null,
+                                TemporaryStorageLimit = reader["TemporaryStorageLimit"] != DBNull.Value ? Convert.ToDateTime(reader["TemporaryStorageLimit"]) : null,
+                                ArchiveFullPath = Convert.ToString(reader["ArchiveFullPath"]) ?? "",
+                                ArchiveTime = reader["ArchiveTime"] != DBNull.Value ? Convert.ToDateTime(reader["ArchiveTime"]) : null,
+                                OrderAmount = Convert.ToDecimal(reader["OrderAmount"]),
+                                ConsignorID = Convert.ToInt32(reader["ConsignorID"]),
+                                ConsignorName = Convert.ToString(reader["ConsignorName"]) ?? "",
+                                FaxNumber = Convert.ToString(reader["FaxNumber"]) ?? "",
+                                TimeStamp = Convert.ToString(reader["TimeStamp"]) ?? "",
+                                StartDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]) : null,
+                                EndDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]) : null,
+                                Department = Convert.ToString(reader["Department"]) ?? "",
+                                Remarks = Convert.ToString(reader["Remarks"]) ?? ""
+                            };
+                            fileTransferHistorys.Add(fileTransferHistory);
                         }
-                        catch (SqlException ex)
-                        {
-                            Console.WriteLine("SQLエラー: " + ex.Message);
-                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        Console.WriteLine("SQLエラー: " + ex.Message);
                     }
                 }
                 catch (SqlException ex)

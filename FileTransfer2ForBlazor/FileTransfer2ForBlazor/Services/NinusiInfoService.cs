@@ -21,30 +21,28 @@ namespace FileTransfer2ForBlazor.Services
 SET     名称_TF = @NNAME 
 WHERE   荷主ID = @NID
 ";
-            
-                using (var connection = new SqlConnection(_connectionString))
-                using (var command = new SqlCommand(sql, connection))
+
+            using var connection = new SqlConnection(_connectionString);
+            using var command = new SqlCommand(sql, connection);
+            try
+            {
+                await connection.OpenAsync();
+                command.Parameters.Add(new SqlParameter("@NID", ninusiID));
+                command.Parameters.Add(new SqlParameter("@NNAME", ninusimei));
+                try
                 {
-                    try
-                    {
-                        await connection.OpenAsync();
-                        command.Parameters.Add(new SqlParameter("@NID", ninusiID));
-                        command.Parameters.Add(new SqlParameter("@NNAME", ninusimei));
-                        try
-                        {
-                            await command.ExecuteNonQueryAsync();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("SQLエラー: " + ex.Message);
-                        }
-                    }
-                    catch (SqlException ex)
-                    {
-                        Console.WriteLine("UpdateNinusimeiAsync: " + ex.Message);
-                    }
+                    await command.ExecuteNonQueryAsync();
                 }
-            
+                catch (Exception ex)
+                {
+                    Console.WriteLine("SQLエラー: " + ex.Message);
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine("UpdateNinusimeiAsync: " + ex.Message);
+            }
+
         }
         public async Task UpdateFaxNumberAsync(int ninusiID, string faxnumber)
         {
@@ -52,30 +50,28 @@ WHERE   荷主ID = @NID
 SET     FAX番号 = @FNUMBER 
 WHERE   荷主ID = @NID
 ";
-            
-                using (var connection = new SqlConnection(_connectionString))
-                using (var command = new SqlCommand(sql, connection))
+
+            using var connection = new SqlConnection(_connectionString);
+            using var command = new SqlCommand(sql, connection);
+            try
+            {
+                await connection.OpenAsync();
+                command.Parameters.Add(new SqlParameter("@NID", ninusiID));
+                command.Parameters.Add(new SqlParameter("@FNUMBER", faxnumber));
+                try
                 {
-                    try
-                    {
-                        await connection.OpenAsync();
-                        command.Parameters.Add(new SqlParameter("@NID", ninusiID));
-                        command.Parameters.Add(new SqlParameter("@FNUMBER", faxnumber));
-                        try
-                        {
-                            await command.ExecuteNonQueryAsync();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("SQLエラー: " + ex.Message);
-                        }
-                    }
-                    catch (SqlException ex)
-                    {
-                        Console.WriteLine("UpdateFaxNumberAsync: " + ex.Message);
-                    }
+                    await command.ExecuteNonQueryAsync();
                 }
-            
+                catch (Exception ex)
+                {
+                    Console.WriteLine("SQLエラー: " + ex.Message);
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine("UpdateFaxNumberAsync: " + ex.Message);
+            }
+
         }
 
 

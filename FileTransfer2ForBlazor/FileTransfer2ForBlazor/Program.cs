@@ -54,9 +54,13 @@ namespace FileTransfer2ForBlazor
                 services.AddSingleton<IndexService>();
                 services.AddSingleton<NinusiInfoService>();
                 services.AddSingleton<FileTransferHistoryService>();
-                services.AddSingleton<FileTranceferLogService>();
+                services.AddSingleton<FileTransferLogService>();
                 services.AddSingleton<ArchiveService>();
                 services.AddSingleton<MotherboardIDService>();
+                services.AddSingleton<ThereforeLogService>();
+                services.AddSingleton<ImportLegacyFilesService>();
+                services.AddSingleton<FileRegistryService>();
+
                 
                 // Build and return the ServiceProvider
                 return services.BuildServiceProvider();

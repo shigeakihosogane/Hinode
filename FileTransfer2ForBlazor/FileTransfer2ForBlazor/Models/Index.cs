@@ -21,5 +21,6 @@ namespace FileTransfer2ForBlazor.Models
         public string FAX番号 { get; set; } = "";
         public int 請求締日 { get; set; } = 1;
 
+
     }
 }

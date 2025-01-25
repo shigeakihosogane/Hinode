@@ -57,6 +57,7 @@ WHERE                       (SerialNumber = @SerialNumber)";
                                     setting.TransferQueueTime = Convert.ToInt32(reader["TransferQueueTime"]);
                                     setting.MonitoringInterval = Convert.ToInt32(reader["MonitoringInterval"]);
                                     setting.ScheduledExecutionTime = Convert.ToDateTime(reader["ScheduledExecutionTime"]);
+                                    setting.LogRetrievalCount = Convert.ToInt32(reader["LogRetrievalCount"]);                                    
                                 }
                             }
                             catch (Exception ex)
@@ -72,42 +73,7 @@ WHERE                       (SerialNumber = @SerialNumber)";
                 }
             }
             return setting;
-        }
-
-
-
-        //await Task.Run(() =>
-        //{
-        //    if (serialNumber == "A39847231006722A")
-        //    {
-        //        setting.Trans1Monitoring = @"C:\Users\Hinode24\Documents\Test\Scan";
-        //        setting.Trans1Successful = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX受信トレイ";
-        //        setting.Trans2Monitoring = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX受信トレイ\Fax転送";
-        //        setting.Trans2Successful = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX一時保管";
-        //        setting.Trans2Error = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX受信トレイ";
-        //        setting.TfUploader = @"C:\Users\Hinode24\Documents\Test\TfUpload";
-        //        setting.ArchiveFolder = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX倉庫";
-        //        setting.FileListFolder = @"C:\Users\Hinode24\Documents\Test\Fax受信\ファイルリスト";
-        //        setting.MonitoringInterval = 1000;//監視インターバル
-        //        setting.ScheduledExecutionTime = new DateTime(now.Year, now.Month, now.Day, 2, 0, 0);
-        //        setting.TransferQueueTime = 10;
-        //    }
-        //    else
-        //    {
-        //        setting.Trans1Monitoring = @"C:\Users\Hinode24\Documents\Test\Scan";
-        //        setting.Trans1Successful = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX受信トレイ";
-        //        setting.Trans2Monitoring = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX受信トレイ\Fax転送";
-        //        setting.Trans2Successful = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX一時保管";
-        //        setting.Trans2Error = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX受信トレイ";
-        //        setting.TfUploader = @"C:\Users\Hinode24\Documents\Test\TfUpload";
-        //        setting.ArchiveFolder = @"C:\Users\Hinode24\Documents\Test\Fax受信\FAX倉庫";
-        //        setting.FileListFolder = @"C:\Users\Hinode24\Documents\Test\Fax受信\ファイルリスト";
-        //        setting.MonitoringInterval = 1000;//監視インターバル
-        //        setting.ScheduledExecutionTime = new DateTime(now.Year, now.Month, now.Day, 2, 0, 0);
-        //        setting.TransferQueueTime = 10;
-        //    }
-
-        //});            
+        }            
 
 
         public async Task SaveSettingAsync(string serialNumber, Setting setting)
@@ -116,10 +82,10 @@ WHERE                       (SerialNumber = @SerialNumber)";
 MERGE INTO [dbo].[T_TF_D_Setting] AS Target
 USING (VALUES 
     (@SerialNumber, @Trans1Monitoring, @Trans1Successful, @Trans2Monitoring, @Trans2Successful, @Trans2Error, 
-     @TfUploader, @ArchiveFolder, @FileListFolder, @TransferQueueTime, @MonitoringInterval, @ScheduledExecutionTime)
+     @TfUploader, @ArchiveFolder, @FileListFolder, @TransferQueueTime, @MonitoringInterval, @ScheduledExecutionTime, @LogRetrievalCount)
 ) AS Source (
     SerialNumber, Trans1Monitoring, Trans1Successful, Trans2Monitoring, Trans2Successful, Trans2Error,
-    TfUploader, ArchiveFolder, FileListFolder, TransferQueueTime, MonitoringInterval, ScheduledExecutionTime
+    TfUploader, ArchiveFolder, FileListFolder, TransferQueueTime, MonitoringInterval, ScheduledExecutionTime, LogRetrievalCount
 )
 ON Target.[SerialNumber] = Source.[SerialNumber]
 WHEN MATCHED THEN
@@ -135,11 +101,13 @@ WHEN MATCHED THEN
         [TransferQueueTime] = Source.[TransferQueueTime],
         [MonitoringInterval] = Source.[MonitoringInterval],
         [ScheduledExecutionTime] = Source.[ScheduledExecutionTime]
+        [LogRetrievalCount] = Source.[LogRetrievalCount]
 WHEN NOT MATCHED BY TARGET THEN
     INSERT ([SerialNumber], [Trans1Monitoring], [Trans1Successful], [Trans2Monitoring], [Trans2Successful], [Trans2Error],
-            [TfUploader], [ArchiveFolder], [FileListFolder], [TransferQueueTime], [MonitoringInterval], [ScheduledExecutionTime])
+            [TfUploader], [ArchiveFolder], [FileListFolder], [TransferQueueTime], [MonitoringInterval], [ScheduledExecutionTime], [LogRetrievalCount])
     VALUES (Source.[SerialNumber], Source.[Trans1Monitoring], Source.[Trans1Successful], Source.[Trans2Monitoring], Source.[Trans2Successful], Source.[Trans2Error],
-            Source.[TfUploader], Source.[ArchiveFolder], Source.[FileListFolder], Source.[TransferQueueTime], Source.[MonitoringInterval], Source.[ScheduledExecutionTime]);";
+            Source.[TfUploader], Source.[ArchiveFolder], Source.[FileListFolder], Source.[TransferQueueTime], Source.[MonitoringInterval], 
+            Source.[ScheduledExecutionTime], Source.[LogRetrievalCount]);";
             
             try
             {
@@ -158,7 +126,8 @@ WHEN NOT MATCHED BY TARGET THEN
                 command.Parameters.Add(new SqlParameter("@TransferQueueTime", setting.TransferQueueTime));
                 command.Parameters.Add(new SqlParameter("@MonitoringInterval", setting.MonitoringInterval));
                 command.Parameters.Add(new SqlParameter("@ScheduledExecutionTime", setting.ScheduledExecutionTime));
-                                
+                command.Parameters.Add(new SqlParameter("@LogRetrievalCount", setting.LogRetrievalCount));
+
                 await connection.OpenAsync();                                
                 int rowsAffected = await command.ExecuteNonQueryAsync();                
             }
@@ -167,14 +136,6 @@ WHEN NOT MATCHED BY TARGET THEN
                 // エラー処理
                 Console.WriteLine($"エラー: {ex.Message}");
             }
-
-
-
-
-
-
-
-
         }
 
 

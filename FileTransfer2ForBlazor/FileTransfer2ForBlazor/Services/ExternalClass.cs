@@ -24,7 +24,11 @@ namespace FileTransfer2ForBlazor.Services
         {
             await _sharedService.TriggerInsertFileTransferHistoryAsync();
         }
-        
+        public async Task CallGetFileRegistryAsync()
+        {
+            await _sharedService.TriggerInsertFileRegistryAsync();
+        }
+
 
 
 

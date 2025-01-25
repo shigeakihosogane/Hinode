@@ -1,0 +1,102 @@
+﻿@using Index = FileSearchSystem.Models.Index
+@* @inject Form2 Form2 *@
+@* @inject DbConnectionService DbConnectionService *@
+@* @inject FormInteractionService InteractionService *@
+@inject FileTransferHistoryService FileTransferHistoryService
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value=@_searchCondition.ZyutyuuID Placeholder="受注ID" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "enter value" }})" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenTextBox @bind-Value="@_searchCondition.ConsignorName" Placeholder="荷主名" Change=@(args => OnChange(args, "TextBox with placeholder")) Style="width: 100%" aria-label="TextBox with placeholder" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenTextBox @bind-Value="@_searchCondition.Department" Placeholder="担当部署" Change=@(args => OnChange(args, "TextBox with placeholder")) Style="width: 100%" aria-label="TextBox with placeholder" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenTextBox @bind-Value="@_searchCondition.Remarks" Placeholder="備考" Change=@(args => OnChange(args, "TextBox with placeholder")) Style="width: 100%" aria-label="TextBox with placeholder" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenTextBox @bind-Value="@_searchCondition.StartDate" Placeholder="開始日" Change=@(args => OnChange(args, "TextBox with placeholder")) Style="width: 100%" aria-label="TextBox with placeholder" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenTextBox @bind-Value="@_searchCondition.EndDate" Placeholder="終了日" Change=@(args => OnChange(args, "TextBox with placeholder")) Style="width: 100%" aria-label="TextBox with placeholder" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value=@_searchCondition.OrderAmountUpper Placeholder="受注金額上限" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "enter value" }})" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value=@_searchCondition.OrderAmountLower Placeholder="受注金額下限" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "enter value" }})" />
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+    <RadzenButton Click=@(args => ClearSearchConditions()) Text="上" ButtonStyle="ButtonStyle.Base" Title="" Size="ButtonSize.ExtraSmall" />
+    <RadzenButton Click=@(args => ClearSearchConditions()) Text="×" ButtonStyle="ButtonStyle.Base" Title="" Size="ButtonSize.ExtraSmall" />
+    <RadzenButton Click=@(args => OpenForm2()) Text="検索" ButtonStyle="ButtonStyle.Base" Title="" Size="ButtonSize.ExtraSmall" />
+</RadzenStack>
+
+@foreach (var history in historys)
+{
+    <p>@history.ArchiveFullPath</p>
+
+}
+
+
+@code {
+
+    private SearchCondition _searchCondition = new();
+
+
+
+    private bool _isOpen;
+    private int Width { get; set; } = 800;
+    private int Height { get; set; } = 600;
+
+
+    private string teststr;
+    private List<FileTransferHistory> historys = new ();
+
+
+
+
+    private async Task OpenForm2()
+    {
+        
+        historys = await FileTransferHistoryService.GetFilesByConditionAsync(_searchCondition);
+
+        var form1 = (Form1)Application.OpenForms["Form1"];
+        form1.OpenForm2(historys);
+
+
+        
+        StateHasChanged();
+    } 
+
+
+
+    private void ClearSearchConditions()
+    {
+        _searchCondition = new();
+    }
+
+
+
+
+
+
+
+    private void OnChange(string value, string name)
+    { 
+    }
+
+    
+
+
+
+}
+<style>
+    /* RadzenDatePicker ダイアログのサイズを調整 */
+    .rz-datepicker-popup {
+        width: 100px !important; /* 必要に応じて幅を設定 */
+        height: 100px !important; /* 必要に応じて高さを設定 */
+    }
+</style>
