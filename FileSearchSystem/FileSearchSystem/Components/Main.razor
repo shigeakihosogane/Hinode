@@ -3,6 +3,7 @@
 @* @inject DbConnectionService DbConnectionService *@
 @* @inject FormInteractionService InteractionService *@
 @inject FileTransferHistoryService FileTransferHistoryService
+@inject FileRegistryService FileRegistryService
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
     <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value=@_searchCondition.ZyutyuuID Placeholder="受注ID" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "enter value" }})" />
@@ -34,9 +35,9 @@
     <RadzenButton Click=@(args => OpenForm2()) Text="検索" ButtonStyle="ButtonStyle.Base" Title="" Size="ButtonSize.ExtraSmall" />
 </RadzenStack>
 
-@foreach (var history in historys)
+@foreach (var fileRegistry in fileRegistrys)
 {
-    <p>@history.ArchiveFullPath</p>
+    <p>@Path.GetFileName(fileRegistry.FileFullPath)</p>
 
 }
 
@@ -53,7 +54,7 @@
 
 
     private string teststr;
-    private List<FileTransferHistory> historys = new ();
+    private List<FileRegistry> fileRegistrys = new();
 
 
 
@@ -61,10 +62,10 @@
     private async Task OpenForm2()
     {
         
-        historys = await FileTransferHistoryService.GetFilesByConditionAsync(_searchCondition);
+        fileRegistrys = await FileRegistryService.GetFileRegistryByConditionAsync(_searchCondition);
 
         var form1 = (Form1)Application.OpenForms["Form1"];
-        form1.OpenForm2(historys);
+        form1.OpenForm2(fileRegistrys);
 
 
         

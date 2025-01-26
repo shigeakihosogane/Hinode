@@ -10,12 +10,12 @@ namespace FileSearchSystem
     public partial class Form2 : Form
     {
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public List<FileTransferHistory> Histories { get; set; }
+        public List<FileRegistry> FileRegistrys { get; set; }
 
-        public Form2(IServiceProvider serviceProvider, List<FileTransferHistory> histories)
+        public Form2(IServiceProvider serviceProvider, List<FileRegistry> fileRegistrys)
         {
             InitializeComponent();
-            Histories = histories;
+            FileRegistrys = fileRegistrys;
 
 
 
@@ -23,7 +23,7 @@ namespace FileSearchSystem
             blazorWebView1.Services = serviceProvider;
             blazorWebView1.RootComponents.Add<Sub>("#app", new Dictionary<string, object>
         {
-            { "histories", Histories }
+            { "FileRegistrys", FileRegistrys }
         });
 
 

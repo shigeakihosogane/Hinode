@@ -25,9 +25,9 @@ namespace FileSearchSystem
 
         }
 
-        public void OpenForm2(List<FileTransferHistory> histories)
+        public void OpenForm2(List<FileRegistry> fileRegistrys)
         {
-            Form2 form2 = new Form2(_serviceProvider, histories);
+            Form2 form2 = new Form2(_serviceProvider, fileRegistrys);
             form2.Show();
         }
 

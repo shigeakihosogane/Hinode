@@ -33,12 +33,13 @@
 
                             </div>
                             <div style="display: flex; flex-wrap: wrap; gap: 20px; overflow-x: auto;">
-                                @if (_files != null && _files.Any())
-                                {                            
-                                    @foreach (var file in _files)
+                                @if (_customFileRegistrys != null && _customFileRegistrys.Any())
+                                {
+                                    @foreach (var customFileRegistry in _customFileRegistrys)
                                     {
-                                        <RadzenCard  Style="height:120px; width:120px; overflow:hidden;" @onclick="() => OnCardClick(file.ArchiveFullPath)">
-                                            <p>@file.ArchiveFullPath</p>
+                                        <RadzenCard Style="height:120px; width:120px; overflow:hidden;" @onclick="() => OnCardClick(customFileRegistry.FileFullPath)">
+                                            <RadzenImage Path="@customFileRegistry.ThumbnailBase64" class="rz-gravatar" style="border-radius: 0;" AlternateText="Thumbnail" />
+                                            <p>@Path.GetFileName(customFileRegistry.FileFullPath)</p>
                                         </RadzenCard>
                                     }
 
@@ -60,7 +61,7 @@
                                 {
                                     <h4>詳細ビュー</h4>
                                 }
-                                
+
                                 <!-- 詳細情報などをここに表示 -->
                             </div>
                             @if (!string.IsNullOrEmpty(_selectedFilePath))
@@ -111,23 +112,36 @@
 
 
 @code{
-    [Parameter] public List<FileTransferHistory> histories { get; set; }
+    [Parameter] public List<FileRegistry> FileRegistrys { get; set; }
 
-    private List<FileTransferHistory> _files = new();
+    private List<CustomFileRegistry> _customFileRegistrys = new();
     private string _selectedFilePath { get; set; } = "";
 
 
-    protected override async Task OnParametersSetAsync()
-    {
-        await Task.Run(() => { 
-            foreach (var history in histories)
+    protected override void OnParametersSet()
+    {        
+        List<CustomFileRegistry>? customs = new();
+        foreach (var fileRegistry in FileRegistrys)
+        {
+            if (File.Exists(fileRegistry.FileFullPath))
             {
-                if (File.Exists(history.ArchiveFullPath))
-                {
-                    _files.Add(history);
-                }
+                var custom = new CustomFileRegistry
+                    {
+                        Id = fileRegistry.Id,
+                        FileFullPath = fileRegistry.FileFullPath,
+                        Thumbnail = fileRegistry.Thumbnail,
+                        CreatedDate = fileRegistry.CreatedDate,
+                        ZyutyuuID = fileRegistry.ZyutyuuID,
+                        ConsignorName = fileRegistry.ConsignorName,
+                        Department = fileRegistry.Department,
+                        StartDate = fileRegistry.StartDate,
+                        EndDate = fileRegistry.EndDate,
+                        OrderAmount = fileRegistry.OrderAmount
+                    };
+                customs.Add(custom);                    
             }
-        });
+        }
+        _customFileRegistrys = customs;        
     }
 
     private void OnCardClick(string filePath)
@@ -140,7 +154,21 @@
 
 
 
+    private class CustomFileRegistry : FileRegistry
+    {
+        public string ThumbnailBase64
+        {
+            get
+            {
+                if (Thumbnail == null || Thumbnail.Length == 0)
+                {
+                    return null;
+                }
+                return $"data:image/jpeg;base64,{Convert.ToBase64String(Thumbnail)}";
+            }
 
+        }
+    }
 
 
 

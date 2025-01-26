@@ -40,8 +40,9 @@ namespace FileSearchSystem
                 services.AddSingleton<DbConnectionService>();
                 services.AddSingleton<FormInteractionService>();
                 services.AddSingleton<FileTransferHistoryService>();
+                services.AddSingleton<FileRegistryService>();
 
-                
+
 
                 // Build and return the ServiceProvider
                 return services.BuildServiceProvider();

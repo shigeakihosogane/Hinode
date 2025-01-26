@@ -132,6 +132,7 @@ namespace FileTransfer2ForBlazor.Services
             };
             var fileTransferLog = new FileTransferLog
             {
+                Process = "一時保管",
                 FullPathBeforeTransfer = fullPath
             };
             try
@@ -401,7 +402,8 @@ namespace FileTransfer2ForBlazor.Services
                     CreatedDate = dt,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     ZyutyuuID = Convert.ToDecimal(fileNameElement.受注CD),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     ConsignorName = fileNameElement.荷主名,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-                    Department = fileNameElement.担当部署,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&                                     
+                    Remarks = fileNameElement.備考,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    Department = fileNameElement.担当部署,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&                                                      //
                 };//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                 if (DateTime.TryParseExact(fileNameElement.開始日, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime sdt))
                 {//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -436,12 +438,12 @@ namespace FileTransfer2ForBlazor.Services
 
             var fNameArray = fileName.Split('_');
             var newFileName = "";
-            var zyutyuuID = Convert.ToInt32(fNameArray[0]);
+            //var zyutyuuID = Convert.ToInt32(fNameArray[0]);
             var sp = 1;
-            if (zyutyuuID == 501 || zyutyuuID == 601 || zyutyuuID == 701 || zyutyuuID == 801 || zyutyuuID == 901)
-            {
-                sp = 2;
-            }
+            //if (zyutyuuID == 501 || zyutyuuID == 601 || zyutyuuID == 701 || zyutyuuID == 801 || zyutyuuID == 901)
+            //{
+            //    sp = 2;
+            //}
             for (var n = sp; n < fNameArray.Length; n++)
             {
                 if (n > sp)

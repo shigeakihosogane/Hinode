@@ -29,6 +29,7 @@ CreatedDate,
 ZyutyuuID,
 ConsignorName,
 Department,
+Remarks,
 StartDate,
 EndDate,
 OrderAmount
@@ -39,6 +40,7 @@ OrderAmount
 @ZyutyuuID,
 @ConsignorName,
 @Department,
+@Remarks,
 @StartDate,
 @EndDate,
 @OrderAmount
@@ -53,7 +55,8 @@ OrderAmount
                 command.Parameters.Add(new SqlParameter("@CreatedDate", fileRegistry.CreatedDate));
                 command.Parameters.Add(new SqlParameter("@ZyutyuuID", fileRegistry.ZyutyuuID));
                 command.Parameters.Add(new SqlParameter("@ConsignorName", fileRegistry.ConsignorName));
-                command.Parameters.Add(new SqlParameter("@Department", fileRegistry.Department));
+                command.Parameters.Add(new SqlParameter("@Department", fileRegistry.Department)); 
+                command.Parameters.Add(new SqlParameter("@Remarks", fileRegistry.Remarks));
                 command.Parameters.Add(new SqlParameter("@StartDate", fileRegistry.StartDate));
                 command.Parameters.Add(new SqlParameter("@EndDate", fileRegistry.EndDate));
                 command.Parameters.Add(new SqlParameter("@OrderAmount", fileRegistry.OrderAmount));
@@ -102,7 +105,8 @@ ORDER BY               Id DESC";
                                 ZyutyuuID = Convert.ToDecimal(reader["ZyutyuuID"]),
                                 ConsignorName = Convert.ToString(reader["ConsignorName"]) ?? "",
                                 Department = Convert.ToString(reader["Department"]) ?? "",
-                                StartDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]) : null,
+                                Remarks = Convert.ToString(reader["Remarks"]) ?? "",
+                                StartDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]) : null,                                
                                 EndDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]) : null,
                                 OrderAmount = Convert.ToDecimal(reader["OrderAmount"])
                             };
