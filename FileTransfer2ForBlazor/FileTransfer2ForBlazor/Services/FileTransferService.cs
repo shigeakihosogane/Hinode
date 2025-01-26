@@ -332,13 +332,13 @@ namespace FileTransfer2ForBlazor.Services
         private async Task MoveToSuccessDirectory(FileNameElement fileNameElement, FileTransferHistory fileTransferHistory, FileTransferLog fileTransferLog, bool cubeState)
         {
             var setting = await _settingService.GetSetting(_serialNumber);//           
-            var rootDirectory = setting.Trans2Successful + @"\";  
+            var rootDirectory = setting.Trans2Successful;  
             var directoryPath = fileNameElement.荷主名 + @"\" + fileNameElement.担当部署;
             if (fileNameElement.担当部署 == "4.倉庫保管")
             {
                 directoryPath += @"\" + fileNameElement.備考;
             }
-            var directoryTo = rootDirectory + directoryPath;
+            var directoryTo = rootDirectory + @"\" + directoryPath;
             if (!Directory.Exists(directoryTo))
             {
                 Directory.CreateDirectory(directoryTo);
