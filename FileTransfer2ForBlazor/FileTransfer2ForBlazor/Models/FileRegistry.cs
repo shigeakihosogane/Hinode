@@ -20,6 +20,11 @@ namespace FileTransfer2ForBlazor.Models
         public DateTime? EndDate { get; set; }
         public decimal OrderAmount { get; set; } = 0;
         public bool IsExecutionCompleted { get; set; }=false;
+        public string RootDirectory { get; set; } = "";
+        public string DirectoryPath { get; set; } = "";
+        public string FileName { get; set; } = "";
+
+
 
 
     }

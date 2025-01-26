@@ -139,6 +139,7 @@
     {
         SharedService.OnInsertFileTranceferLog -= GetFileTransferHistory;
         SharedService.OnInsertFileTransferHistory -= GetFileTranceferLog;
+        SharedService.OnInsertFileRegistry -= GetFileRegistry;
 
         _mainTimer?.Dispose();
         _archiveTimer?.Dispose();

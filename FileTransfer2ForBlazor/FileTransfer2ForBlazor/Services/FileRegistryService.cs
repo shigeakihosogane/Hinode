@@ -32,7 +32,10 @@ Department,
 Remarks,
 StartDate,
 EndDate,
-OrderAmount
+OrderAmount,
+RootDirectory,
+DirectoryPath,
+FileName
 ) VALUES (
 @FileFullPath,
 @Thumbnail,
@@ -43,7 +46,10 @@ OrderAmount
 @Remarks,
 @StartDate,
 @EndDate,
-@OrderAmount
+@OrderAmount,
+@RootDirectory,
+@DirectoryPath,
+@FileName
 )";
             using var connection = new SqlConnection(_connectionString);
             using var command = new SqlCommand(sql, connection);
@@ -60,6 +66,9 @@ OrderAmount
                 command.Parameters.Add(new SqlParameter("@StartDate", fileRegistry.StartDate));
                 command.Parameters.Add(new SqlParameter("@EndDate", fileRegistry.EndDate));
                 command.Parameters.Add(new SqlParameter("@OrderAmount", fileRegistry.OrderAmount));
+                command.Parameters.Add(new SqlParameter("@RootDirectory", fileRegistry.RootDirectory));
+                command.Parameters.Add(new SqlParameter("@DirectoryPath", fileRegistry.DirectoryPath));
+                command.Parameters.Add(new SqlParameter("@FileName", fileRegistry.FileName));
                 try
                 {
                     await command.ExecuteNonQueryAsync();
@@ -108,7 +117,11 @@ ORDER BY               Id DESC";
                                 Remarks = Convert.ToString(reader["Remarks"]) ?? "",
                                 StartDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]) : null,                                
                                 EndDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]) : null,
-                                OrderAmount = Convert.ToDecimal(reader["OrderAmount"])
+                                OrderAmount = Convert.ToDecimal(reader["OrderAmount"]),
+                                RootDirectory = Convert.ToString(reader["RootDirectory"]) ?? "",
+                                DirectoryPath = Convert.ToString(reader["DirectoryPath"]) ?? "",
+                                FileName = Convert.ToString(reader["FileName"]) ?? ""
+
                             };
                             fileRegistrys.Add(fileRegistry);
                         }
