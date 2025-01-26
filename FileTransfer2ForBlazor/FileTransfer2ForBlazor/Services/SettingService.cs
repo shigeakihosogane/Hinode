@@ -100,7 +100,7 @@ WHEN MATCHED THEN
         [FileListFolder] = Source.[FileListFolder],
         [TransferQueueTime] = Source.[TransferQueueTime],
         [MonitoringInterval] = Source.[MonitoringInterval],
-        [ScheduledExecutionTime] = Source.[ScheduledExecutionTime]
+        [ScheduledExecutionTime] = Source.[ScheduledExecutionTime],
         [LogRetrievalCount] = Source.[LogRetrievalCount]
 WHEN NOT MATCHED BY TARGET THEN
     INSERT ([SerialNumber], [Trans1Monitoring], [Trans1Successful], [Trans2Monitoring], [Trans2Successful], [Trans2Error],
@@ -108,12 +108,13 @@ WHEN NOT MATCHED BY TARGET THEN
     VALUES (Source.[SerialNumber], Source.[Trans1Monitoring], Source.[Trans1Successful], Source.[Trans2Monitoring], Source.[Trans2Successful], Source.[Trans2Error],
             Source.[TfUploader], Source.[ArchiveFolder], Source.[FileListFolder], Source.[TransferQueueTime], Source.[MonitoringInterval], 
             Source.[ScheduledExecutionTime], Source.[LogRetrievalCount]);";
-            
+
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            using (SqlTransaction transaction = connection.BeginTransaction())
+            using (SqlCommand command = new SqlCommand(sql, connection, transaction))
             try
             {
-                using SqlConnection connection = new SqlConnection(_connectionString);
-                using SqlCommand command = new(sql, connection);
-
                 command.Parameters.Add(new SqlParameter("@SerialNumber", serialNumber));
                 command.Parameters.Add(new SqlParameter("@Trans1Monitoring", setting.Trans1Monitoring));
                 command.Parameters.Add(new SqlParameter("@Trans1Successful", setting.Trans1Successful));
@@ -127,14 +128,15 @@ WHEN NOT MATCHED BY TARGET THEN
                 command.Parameters.Add(new SqlParameter("@MonitoringInterval", setting.MonitoringInterval));
                 command.Parameters.Add(new SqlParameter("@ScheduledExecutionTime", setting.ScheduledExecutionTime));
                 command.Parameters.Add(new SqlParameter("@LogRetrievalCount", setting.LogRetrievalCount));
-
-                await connection.OpenAsync();                                
-                int rowsAffected = await command.ExecuteNonQueryAsync();                
+                                        
+                int rowsAffected = await command.ExecuteNonQueryAsync();
+                transaction.Commit();
             }
-            catch (Exception ex)
+            catch
             {
-                // エラー処理
-                Console.WriteLine($"エラー: {ex.Message}");
+                transaction.Rollback();
+                throw;
+                    
             }
         }
 

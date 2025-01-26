@@ -60,8 +60,8 @@
 
 @code {
 
-    private bool _isRun; 
-    private Setting _setting = new();
+    private bool _isRun;
+    private Setting _setting { get; set; } = new();
     private string _serialNumber = "";
     private static bool _isAzureConnected;
     private static bool _isCubeConnected;
@@ -294,10 +294,10 @@
 
 
     private async Task SaveSetting(Setting newSetting)
-    {
-        await SettingService.SaveSettingAsync(_serialNumber,newSetting);
+    {        
+        await SettingService.SaveSettingAsync(_serialNumber,newSetting);        
         await this.GetSetting(_serialNumber);
-        this.ExecuteDailyTask(null);
+        this.ScheduleDailyExecution();
     }
 
 
@@ -305,14 +305,7 @@
 
 
     private async void OnClick()
-    {
-        var sTime = DateTime.Now;
-        testString = sTime.ToString();
-        var count = await ImportLegacyFilesService.ImportLegacyFiles();
-        var eTime = DateTime.Now;
-        TimeSpan timeSpan = eTime - sTime;
-        testString = count.ToString() + "_" + timeSpan.ToString();
-        StateHasChanged();
+    {       
     }
 
 
