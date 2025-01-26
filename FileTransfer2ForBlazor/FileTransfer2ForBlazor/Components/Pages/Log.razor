@@ -7,7 +7,7 @@
         <RadzenTabsItem Text="ファイル転送履歴">
             <div class="data-grid-wrapper">
                 <RadzenDataGrid AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
-                                Data="@fileTransferLogs" TItem="FileTransferLog">
+                Data="@fileTransferLogs" TItem="FileTransferLog">
                     <Columns>
                         <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" />
                         <RadzenDataGridColumn Property="Process" Title="処理" Width="80px" />
@@ -35,7 +35,7 @@
 
         <RadzenTabsItem Text="アーカイブ履歴">
             <div class="data-grid-wrapper">
-                <RadzenDataGrid　@ref =grid FilterMode="FilterMode.Simple" AllowFiltering="true" AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
+                <RadzenDataGrid FilterMode="FilterMode.Simple" AllowFiltering="true" AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
                 Data="@fileTransferHistorys" TItem="FileTransferHistory">
                     <Columns>
                         <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" Filterable="false" />
@@ -86,31 +86,42 @@
                 </RadzenDataGrid　>
             </div>
         </RadzenTabsItem>  
-        
+
         <RadzenTabsItem Text="FileRegistry">
             <div class="data-grid-wrapper">
-                <RadzenDataGrid AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
-                                Data="@fileTransferLogs" TItem="FileTransferLog">
+                <RadzenDataGrid FilterMode="FilterMode.Simple" AllowFiltering="true" AllowColumnResize="true" Style="width: auto; height: calc(100vh - 200px);"
+                                Data="@_customFileRegistry" TItem="CustomFileRegistry">
                     <Columns>
-                        <RadzenDataGridColumn Property="Id" Title="ID" Width="70px" />
-                        <RadzenDataGridColumn Property="Process" Title="処理" Width="80px" />
-                        <RadzenDataGridColumn Property="Result" Title="結果" Width="80px" />
+                        <RadzenDataGridColumn Property="Id" Title="ID" Width="70px"  Filterable="false"/>
+                        <RadzenDataGridColumn Title="画像" Frozen="true" Sortable="false" Filterable="false" Width="80px" TextAlign="TextAlign.Center">
+                            <Template Context="data">
+                                @if (!string.IsNullOrEmpty(data.ThumbnailBase64))
+                                {
+                                    <RadzenImage Path="@data.ThumbnailBase64" class="rz-gravatar" style="border-radius: 0;" AlternateText="Thumbnail" />
+                                }
+                                else
+                                {
+                                    <span>No Image</span>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
                         <RadzenDataGridColumn Title="出力ファイル名" Width="600px">
-                            <Template Context="data">
-                                @Path.GetFileName(data.FullPathAfterTransfer)
+                            <Template Context="data">                                
+                                <a href="#" @onclick="() => OpenFileWithAppBasedOnExtension(data.FileFullPath)">
+                                    @Path.GetFileName(data.FileFullPath)
+                                </a>
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="転送先" Width="400px">
-                            <Template Context="data">
-                                @Path.GetDirectoryName(data.FullPathAfterTransfer)
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="ProcessedDateTime" Title="処理日時" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" />
-                        <RadzenDataGridColumn Title="入力ファイル名" Width="400px">
-                            <Template Context="data">
-                                @Path.GetFileName(data.FullPathBeforeTransfer)
-                            </Template>
-                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Property="CreatedDate" Title="保存日時" Width="140px" FormatString="{0:yyyy-MM-dd HH:mm:ss}" Filterable="false" />
+                        <RadzenDataGridColumn Property="ZyutyuuID" Title="受注ID" Width="100px" Filterable="true" />
+                        <RadzenDataGridColumn Property="ConsignorName" Title="荷主名" Width="100px" Filterable="true" />
+                        <RadzenDataGridColumn Property="Department" Title="担当" Width="100px" Filterable="true" />
+                        <RadzenDataGridColumn Property="StartDate" Title="開始日" Width="90px" FormatString="{0:yyyy-MM-dd}" Filterable="true" />
+                        <RadzenDataGridColumn Property="EndDate" Title="終了日" Width="90px" FormatString="{0:yyyy-MM-dd}" Filterable="true" />
+                        <RadzenDataGridColumn Property="OrderAmount" Title="受注金額" Width="100px" Filterable="true" />
+
                     </Columns>
                 </RadzenDataGrid>
             </div>
@@ -122,9 +133,13 @@
 @code {
     [Parameter]public List<FileTransferHistory>? fileTransferHistorys { get; set; }
     [Parameter]public List<FileTransferLog>? fileTransferLogs{ get; set; }
+    [Parameter]public List<FileRegistry>? fileRegistry { get; set; }
 
-    TabPosition tabPosition = TabPosition.Top;
-    RadzenDataGrid<FileTransferHistory> grid;
+    TabPosition tabPosition = TabPosition.Top;    
+    private List<CustomFileRegistry>? _customFileRegistry { get; set; }
+
+
+
 
     protected override void OnParametersSet()
     {
@@ -136,21 +151,33 @@
         {
             fileTransferHistorys = fileTransferHistorys.OrderByDescending(h => h.Id).ToList();
         }
+        if (fileRegistry != null)
+        {            
+            List<CustomFileRegistry>? customs = new();
+            foreach (var registry in fileRegistry)
+            {                
+                var custom = new CustomFileRegistry
+                {
+                    Id = registry.Id,
+                    FileFullPath = registry.FileFullPath,
+                    Thumbnail = registry.Thumbnail,
+                    CreatedDate = registry.CreatedDate,
+                    ZyutyuuID = registry.ZyutyuuID,
+                    ConsignorName = registry.ConsignorName,
+                    Department = registry.Department,
+                    StartDate = registry.StartDate,
+                    EndDate = registry.EndDate,
+                    OrderAmount = registry.OrderAmount
+                };
+                customs.Add(custom);
+            }
+            _customFileRegistry = customs;
+            _customFileRegistry = _customFileRegistry.OrderByDescending(h => h.Id).ToList();
+        }
     }
 
     private static void OpenFileWithAppBasedOnExtension(string filePath)
     {
-        // 拡張子とアプリケーションのマッピング
-        var appMapping = new Dictionary<string, string>
-        {
-            { ".txt", @"C:\Windows\System32\notepad.exe" }, // メモ帳
-            { ".csv", @"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE" }, // Excel
-            { ".pdf", @"C:\Program Files\Canon\Desktop\iWDT.Editor.Integrate.EditorProcess.exe" }, // Adobe Acrobat
-            { ".jpg", @"C:\Windows\System32\mspaint.exe" }, // ペイント
-            { ".png", @"C:\Windows\System32\mspaint.exe" }, // ペイント
-            { ".mp4", @"C:\Program Files\VideoLAN\VLC\vlc.exe" } // VLC メディアプレーヤー
-        };
-
         try
         {
             if (!File.Exists(filePath))
@@ -159,37 +186,40 @@
                 return;
             }
 
-            // ファイルの拡張子を取得
-            string extension = Path.GetExtension(filePath).ToLower();
-
-            if (appMapping.ContainsKey(extension))
-            {
-                string appPath = appMapping[extension];
-
-                if (File.Exists(appPath))
+            // シェルを使ってファイルを関連付けられたアプリケーションで開く
+            Process.Start(new ProcessStartInfo
                 {
-                    // アプリケーションを指定してファイルを開く
-                    Process.Start(new ProcessStartInfo
-                        {
-                            FileName = appPath,
-                            Arguments = $"\"{filePath}\"", // ファイルパスを引数として渡す
-                            UseShellExecute = false // シェルを使わずにプロセスを開始
-                        });
-                    Console.WriteLine($"アプリケーションでファイルを開きました: {appPath}");
-                }
-                else
-                {
-                    Console.WriteLine($"指定されたアプリケーションが見つかりません: {appPath}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"この拡張子に対応するアプリケーションが見つかりません: {extension}");
-            }
+                    FileName = filePath,
+                    UseShellExecute = true // シェルを使ってファイルを開く
+                });
+            Console.WriteLine($"ファイルを開きました: {filePath}");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"ファイルを開く際にエラーが発生しました: {ex.Message}");
+        }
+    }
+
+
+
+
+
+
+
+
+    private class CustomFileRegistry : FileRegistry
+    {
+        public string ThumbnailBase64
+        {
+            get
+            {
+                if (Thumbnail == null || Thumbnail.Length == 0)
+                {
+                    return null;
+                }
+                return $"data:image/jpeg;base64,{Convert.ToBase64String(Thumbnail)}";
+            }
+            
         }
     }
 

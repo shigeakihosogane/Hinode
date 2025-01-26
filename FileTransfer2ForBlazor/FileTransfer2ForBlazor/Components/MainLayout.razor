@@ -108,10 +108,10 @@
 
             await this.GetFileTransferHistory();
             await this.GetFileTranceferLog();
+            await this.GetFileRegistry();
         }
 
         SharedService.OnInsertFileTranceferLog += GetFileTranceferLog;
-        SharedService.OnInsertFileTransferHistory += GetFileTransferHistory;
         SharedService.OnInsertFileTransferHistory += GetFileTransferHistory;
         SharedService.OnInsertFileRegistry += GetFileRegistry;
         ScheduleDailyExecution();
@@ -167,7 +167,7 @@
             "Status" => @<Status isRun="@_isRun" mainTimerStartDateTime="@_mainTimerStartDateTime" mainTimerElapsedTime="@_mainTimerElapsedTime" mainTimerStatus="@_mainTimerStatus"
         nextExecutionTime="@_nextExecutionTime" lastExecutionTime="@_lastExecutionTime" archiveProcessedCount="@_archiveProcessedCount" temporaryStorageTotalCount="@_temporaryStorageTotalCount"
                         OnRunArchiveNow="ExecuteDailyTask" isAzureConnected="@_isAzureConnected" isCubeConnected="@_isCubeConnected"/>,
-            "Log" => @<Log fileTransferHistorys="@_fileTransferHistorys" fileTransferLogs="@_fileTransferLogs" />,
+            "Log" => @<Log fileTransferHistorys="@_fileTransferHistorys" fileTransferLogs="@_fileTransferLogs" fileRegistry="@_fileRegistrys" />,
             "Settings" => @<Settings setting="@_setting" isRun="@_isRun" OnIsRunChanged="UpdateIsRun" OnSettingChanged="SaveSetting" />,
             "FileImport" => @<FileImport />,
             _ => @<p>Unknown Page</p>

@@ -24,6 +24,7 @@ namespace FileTransfer2ForBlazor.Services
         {
             var sql = @"INSERT INTO dbo.T_TF_D_FileRegistry (
 FileFullPath,
+Thumbnail,
 CreatedDate,
 ZyutyuuID,
 ConsignorName,
@@ -33,6 +34,7 @@ EndDate,
 OrderAmount
 ) VALUES (
 @FileFullPath,
+@Thumbnail,
 @CreatedDate,
 @ZyutyuuID,
 @ConsignorName,
@@ -47,6 +49,7 @@ OrderAmount
             {
                 await connection.OpenAsync();
                 command.Parameters.Add(new SqlParameter("@FileFullPath", fileRegistry.FileFullPath));
+                command.Parameters.Add(new SqlParameter("@Thumbnail", fileRegistry.Thumbnail));
                 command.Parameters.Add(new SqlParameter("@CreatedDate", fileRegistry.CreatedDate));
                 command.Parameters.Add(new SqlParameter("@ZyutyuuID", fileRegistry.ZyutyuuID));
                 command.Parameters.Add(new SqlParameter("@ConsignorName", fileRegistry.ConsignorName));
@@ -94,7 +97,7 @@ ORDER BY               Id DESC";
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
                                 FileFullPath = Convert.ToString(reader["FileFullPath"]) ?? "",
-                                Thumbnail = reader["Thumbnail"] as Byte[],
+                                Thumbnail = reader["Thumbnail"]!=DBNull.Value ? reader["Thumbnail"] as Byte[] : null,
                                 CreatedDate = Convert.ToDateTime(reader["CreatedDate"]),
                                 ZyutyuuID = Convert.ToDecimal(reader["ZyutyuuID"]),
                                 ConsignorName = Convert.ToString(reader["ConsignorName"]) ?? "",

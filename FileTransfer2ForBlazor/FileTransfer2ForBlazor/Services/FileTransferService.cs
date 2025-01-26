@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +12,7 @@ using FileTransfer2ForBlazor.Components.Pages;
 using FileTransfer2ForBlazor.Models;
 using ImageMagick;
 using Microsoft.VisualBasic.Logging;
+using PdfiumViewer;
 using Index = FileTransfer2ForBlazor.Models.Index;
 
 
@@ -394,14 +397,20 @@ namespace FileTransfer2ForBlazor.Services
                 var fileRegistry = new FileRegistry//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&FileRegistry
                 {//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     FileFullPath = newPath,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-                    Thumbnail = this.GenerateThumbnail(newPath),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    Thumbnail = this.GeneratePdfThumbnail(newPath),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     CreatedDate = dt,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     ZyutyuuID = Convert.ToDecimal(fileNameElement.受注CD),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     ConsignorName = fileNameElement.荷主名,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-                    Department = fileNameElement.担当部署,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-                    StartDate = DateTime.Parse(fileNameElement.開始日),//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-                    EndDate = DateTime.Parse(fileNameElement.終了日)//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&                  
+                    Department = fileNameElement.担当部署,//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&                                     
                 };//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                if (DateTime.TryParseExact(fileNameElement.開始日, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime sdt))
+                {//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    fileRegistry.StartDate = sdt;//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                }//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                if (DateTime.TryParseExact(fileNameElement.終了日, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime edt))
+                {//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    fileRegistry.EndDate = edt;//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                }//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                 await _fileRegistryService.InsertFileRegistryAsync(fileRegistry);//&&&&&&&&&&&&&&&&&&&&&
                 fileTransferLog.Process = "Registry";//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                 fileTransferLog.FullPathAfterTransfer = newPath;//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -499,13 +508,41 @@ namespace FileTransfer2ForBlazor.Services
             return defaultDate.AddDays(transferQueueTime);
         }
 
-        public byte[] GenerateThumbnail(string pdfPath)
+        private byte[] GeneratePdfThumbnail(string pdfFilePath)
         {
-            using var images = new MagickImageCollection();
-            images.Read(pdfPath);
-            var firstPage = images[0];// 最初のページを取得
-            firstPage.Resize(256, 256);// サムネイルサイズにリサイズ
-            return firstPage.ToByteArray(MagickFormat.Png);// サムネイルを PNG バイト配列として保存
+            if (!File.Exists(pdfFilePath))
+            {
+                throw new FileNotFoundException($"The file does not exist: {pdfFilePath}");
+            }
+
+            try
+            {
+                using (var pdfDocument = PdfiumViewer.PdfDocument.Load(pdfFilePath))
+                {
+                    // PDFページ数を確認
+                    if (pdfDocument.PageCount == 0)
+                    {
+                        throw new InvalidOperationException("The PDF file contains no pages.");
+                    }
+
+                    // 指定したページを画像として描画 (ここでは最初のページ 0)
+                    using (var image = pdfDocument.Render(0, 256, 256, dpiX: 72, dpiY: 72, false))
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            // サムネイルをJPEG形式でメモリに保存
+                            image.Save(memoryStream, ImageFormat.Jpeg);
+                            return memoryStream.ToArray();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // エラーの詳細をログまたは例外として出力
+                Console.WriteLine($"An error occurred while generating the PDF thumbnail: {ex.Message}");
+                throw;
+            }
         }
 
 

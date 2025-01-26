@@ -38,7 +38,7 @@ namespace FileTransfer2ForBlazor.Services
 @結果, 
 @変更前ファイル名, 
 @変更後ファイル名, 
-@日時";
+@日時)";
 
             using var connection = new SqlConnection(_connectionString);
             using var command = new SqlCommand(sql, connection);
