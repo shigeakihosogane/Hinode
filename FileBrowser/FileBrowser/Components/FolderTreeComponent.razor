@@ -26,9 +26,10 @@
     {
         RootDirectory = await RootDirectoryService.GetRootDirectoryAsync();
         var folderNodes = new List<FolderNode>();
-        await Task.Run(() =>
+        
+        foreach (var rootDirectory in RootDirectory)
         {
-            foreach (var rootDirectory in RootDirectory)
+            await Task.Run(() =>
             {
                 if (Directory.Exists(rootDirectory.DirectoryPath))
                 {
@@ -42,8 +43,9 @@
                     folderNode.Expanded = false;
                     folderNodes.Add(folderNode);
                 }
-            }
-        });
+            });
+        }
+        
         FolderTree = folderNodes;
     }
 

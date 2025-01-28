@@ -1,0 +1,27 @@
+﻿<h3>Component1</h3>
+
+
+@foreach (var contents in DisplayContents)
+{
+    <p>@contents.Name</p>
+}
+
+
+
+
+
+@code {
+
+        [Parameter] public List<DisplayContent> DisplayContents { get; set; }
+        
+
+
+
+
+
+
+
+
+
+
+}
