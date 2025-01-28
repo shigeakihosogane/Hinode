@@ -88,7 +88,11 @@ namespace FileSearchSystem.Services
                         Remarks = Convert.ToString(reader["Remarks"]) ?? "",
                         StartDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]) : null,
                         EndDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]) : null,
-                        OrderAmount = Convert.ToDecimal(reader["OrderAmount"])
+                        OrderAmount = Convert.ToDecimal(reader["OrderAmount"]),
+                        IsExecutionCompleted = Convert.ToBoolean(reader["IsExecutionCompleted"]),
+                        RootDirectory = Convert.ToString(reader["RootDirectory"]) ?? "",
+                        DirectoryPath = Convert.ToString(reader["DirectoryPath"]) ?? "",
+                        FileName = Convert.ToString(reader["FileName"]) ?? ""
                     };
                     fileRegistrys.Add(fileRegistry);
                 }

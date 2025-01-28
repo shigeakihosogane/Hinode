@@ -1,0 +1,108 @@
+﻿
+
+
+<div style="height:100vh; width: 100%;">
+    <SfAppBar ColorMode="AppBarColor.Dark" style="height: 50px;">
+        <SfButton CssClass="e-inherit" IconCss="e-icons e-menu"></SfButton>
+        <AppBarSpacer></AppBarSpacer>
+        <SfButton CssClass="e-inherit" Content="FREE TRIAL"></SfButton>
+    </SfAppBar>
+
+    <SfSplitter Height="calc(100vh - 80px)" Width="100%">
+        <SplitterPanes>
+            <SplitterPane Size="300px" Min="200px">
+                <ContentTemplate>
+
+                    <Search OnSelectedFolder="HandleSelectedFolder" />
+
+                </ContentTemplate>
+            </SplitterPane>
+            <SplitterPane>
+                <ContentTemplate>                    
+                    <div class="centered-content">
+                        <p>@_selectedFolderPath</p>
+                    </div>                    
+                </ContentTemplate>
+            </SplitterPane>
+            <SplitterPane>
+                <ContentTemplate>
+                    <div class="centered-content">Right Pane</div>
+                </ContentTemplate>
+            </SplitterPane>
+        </SplitterPanes>
+    </SfSplitter>
+</div>
+
+@code {
+
+    private string _selectedFolderPath { get; set; } = "";
+    private List<FolderContent> SelectedFolderContents = new();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+
+    }
+
+
+    private async Task HandleSelectedFolder(string folderPath)
+    {
+        _selectedFolderPath = folderPath;
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+
+
+    
+
+
+    private void LoadSelectedFolderContents(string folderPath)
+    {
+        SelectedFolderContents = new List<FolderContent>();
+        if (Directory.Exists(folderPath))
+        {
+            // サブフォルダを追加
+            foreach (var directory in Directory.GetDirectories(folderPath))
+            {
+                SelectedFolderContents.Add(new FolderContent
+                    {
+                        Name = Path.GetFileName(directory),
+                        IsFolder = true
+                    });
+            }
+
+            // ファイルを追加
+            foreach (var file in Directory.GetFiles(folderPath))
+            {
+                SelectedFolderContents.Add(new FolderContent
+                    {
+                        Name = Path.GetFileName(file),
+                        IsFolder = false
+                    });
+            }
+        }
+    }
+    // フォルダやファイルの中身を表すクラス
+    private class FolderContent
+    {
+        public string Name { get; set; }
+        public bool IsFolder { get; set; }
+    }
+
+    
+
+    
+
+}
+
+
+
+
+
+
+
