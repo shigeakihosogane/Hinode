@@ -11,25 +11,30 @@
     <SfSplitter Height="calc(100vh - 80px)" Width="100%">
         <SplitterPanes>
             <SplitterPane Size="300px" Min="200px">
-                <ContentTemplate>
-
-                    <FolderTreeComponent OnSelectedFolder="HandleSelectedFolder" />
-
+                <ContentTemplate >
+                    <div style="height: calc(100vh - 85px); display: flex; flex-direction: column; overflow:hidden">
+                        
+                    <FileSearchComponent />
+                    
+                        <div style="flex: 1; overflow: auto;">
+                            <FolderTreeComponent OnSelectedFolder="HandleSelectedFolder" />
+                        </div>
+                    </div>
+                    
                 </ContentTemplate>
             </SplitterPane>
             <SplitterPane>
                 <ContentTemplate>
                     
-                    <FileListComponent DisplayContents="@_displayContents"/>
+                    <FileListComponent DisplayContents="@_displayContents" OnSelectedContent="HandleContentSelection" />
 
                 </ContentTemplate>
             </SplitterPane>
             <SplitterPane>
                 <ContentTemplate>
 
-
-
-                    <div class="centered-content">Right Pane</div>
+                    <FileDetailsComponent SelectedContent="@_selectedContent"/>
+                                        
                 </ContentTemplate>
             </SplitterPane>
         </SplitterPanes>
@@ -41,10 +46,10 @@
     private string _selectedFolderPath { get; set; } = "";
     private List<DisplayContent> _displayContents = new();
 
+    private DisplayContent? _selectedContent = new();
 
 
-
-
+       
 
     private async Task HandleSelectedFolder(string folderPath)
     {
@@ -86,7 +91,10 @@
     }
     
     
-
+    private void HandleContentSelection(DisplayContent selectedContent)
+    {
+        _selectedContent = selectedContent;        
+    }
     
 
     

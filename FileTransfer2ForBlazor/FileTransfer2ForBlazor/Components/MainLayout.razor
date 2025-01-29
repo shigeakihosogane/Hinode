@@ -239,19 +239,27 @@
         await InvokeAsync(StateHasChanged);
 
         //scan転送1処理
-        var files1 = Directory.GetFiles(_setting.Trans1Monitoring);
+        var files1 = Directory.GetFiles(_setting.Trans1Monitoring);        
         foreach (var file in files1)
         {
             var fn = Path.GetFileName(file);
-            await FileTransferService.AtherFileFormat(file,_isCubeConnected);
+            var ext = Path.GetExtension(file);
+            if(ext!=".tmp" && ext!=".db")
+            {
+                await FileTransferService.AtherFileFormat(file, _isCubeConnected);
+            }
         }
 
         //FAX一時転送処理
         var files2 = Directory.GetFiles(_setting.Trans2Monitoring);
         foreach (var file in files2)
         {
-            var fn = Path.GetFileName(file);                
-            await FileTransferService.GenerateFileNameWithIndex(file,_isCubeConnected);
+            var fn = Path.GetFileName(file); 
+            var ext = Path.GetExtension(file);
+            if (ext != ".tmp" && ext != ".db")
+            {
+                await FileTransferService.GenerateFileNameWithIndex(file, _isCubeConnected);
+            }            
         }
     }
 

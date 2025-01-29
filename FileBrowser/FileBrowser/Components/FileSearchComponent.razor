@@ -1,5 +1,80 @@
-﻿<h3>FileSearchComponent</h3>
+﻿
+
+
+
+<SfAccordion>
+    <AccordionItems>
+        <AccordionItem>
+            <HeaderTemplate>
+                <div>
+                    <SfNumericTextBox TValue="decimal?" @bind-Value="@_searchCondition.ZyutyuuID" Placeholder="受注ID" ShowSpinButton="false" Format="0"></SfNumericTextBox>                    
+                    <span class="material-symbols-outlined">feature_search</span>
+                </div>                
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div>                    
+                    <SfComboBox TValue="string" Placeholder="荷主名" TItem="string" @bind-Value="@_searchCondition.ConsignorName" DataSource="@_customers" AllowFiltering="true"></SfComboBox>
+                    <SfComboBox TValue="string" Placeholder="担当" TItem="string" @bind-Value="@_searchCondition.Department" DataSource="@_departments"></SfComboBox>                    
+                    <SfTextBox @bind-Value="@_searchCondition.Remarks" Placeholder="備考"></SfTextBox>
+                    <SfDatePicker TValue="DateTime?" @bind-Value="@_searchCondition.StartDate" Placeholder="開始日"></SfDatePicker>
+                    <SfDatePicker TValue="DateTime?" @bind-Value="@_searchCondition.EndDate" Placeholder="終了日"></SfDatePicker>
+                    <SfNumericTextBox TValue="decimal?" @bind-Value="@_searchCondition.OrderAmountUpper" Placeholder="受注金額上限" ShowSpinButton="false" Format="0"></SfNumericTextBox>
+                    <SfNumericTextBox TValue="decimal?" @bind-Value="@_searchCondition.OrderAmountLower" Placeholder="受注金額下限" ShowSpinButton="false" Format="0"></SfNumericTextBox>
+                </div>
+            </ContentTemplate>
+        </AccordionItem>
+
+    </AccordionItems>
+</SfAccordion>
+
+
+
+
+
+
 
 @code {
+    [Parameter] public EventCallback<SearchCondition> OnSelectedSearchCondition { get; set; }
+
+    private SearchCondition _searchCondition = new();
+    private List<string> _customers = new();
+    List<string> _departments = new List<string>
+    {
+        "Australia",
+        "Bermuda",
+        "Canada",
+        "Cameroon",
+    };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.GetCustomer();
+    }
+
+    private async Task GetCustomer()
+    {
+        _customers = await CustomerService.GetCustomersAsync();
+    }
+
+
+
+    
+
+
+
+    
+
+
+
+    private void ClearSearchConditions()
+    {
+        _searchCondition = new();
+    }
+
+
+
+
+    
 
 }

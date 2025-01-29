@@ -10,10 +10,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="9.0.30" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="28.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="28.1.41" />
     <PackageReference Include="Syncfusion.Blazor.Core" Version="28.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="28.1.41" />
     <PackageReference Include="Syncfusion.Blazor.Layouts" Version="28.1.41" />
     <PackageReference Include="Syncfusion.Blazor.Navigations" Version="28.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.SfPdfViewer" Version="28.1.41" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.1.41" />
   </ItemGroup>
 

@@ -28,13 +28,20 @@ namespace FileBrowser
                 var services = new ServiceCollection();
                 services.AddSingleton<Form1>();
                 services.AddWindowsFormsBlazorWebView();
+
+                
+                services.AddMemoryCache();
                 services.AddSyncfusionBlazor();
 
+
+
                 // Register services
+                services.AddSingleton<DbConnectionService>();
                 services.AddSingleton<RootDirectoryService>();
+                services.AddSingleton<CustomerService>();
+
+
                 
-
-
 
 
 
