@@ -13,19 +13,19 @@
             <SplitterPane Size="300px" Min="200px">
                 <ContentTemplate >
                     <div style="height: calc(100vh - 85px); display: flex; flex-direction: column; overflow:hidden">
-                        
-                    <FileSearchComponent />
-                    
+
+                        <FileSearchComponent OnSearchCondition="HandleSearchCondition" />
+
                         <div style="flex: 1; overflow: auto;">
                             <FolderTreeComponent OnSelectedFolder="HandleSelectedFolder" />
                         </div>
                     </div>
-                    
+
                 </ContentTemplate>
             </SplitterPane>
             <SplitterPane>
                 <ContentTemplate>
-                    
+
                     <FileListComponent DisplayContents="@_displayContents" OnSelectedContent="HandleContentSelection" />
 
                 </ContentTemplate>
@@ -34,7 +34,7 @@
                 <ContentTemplate>
 
                     <FileDetailsComponent SelectedContent="@_selectedContent"/>
-                                        
+
                 </ContentTemplate>
             </SplitterPane>
         </SplitterPanes>
@@ -43,21 +43,24 @@
 
 @code {
 
-    private string _selectedFolderPath { get; set; } = "";
-    private List<DisplayContent> _displayContents = new();
+    private string _selectedFolderPath { get; set; } = "";//ツリーから返ってくるフォルダパス
+    private SearchCondition? _searchCondition = new();//検索画面から返ってくる検索条件
 
-    private DisplayContent? _selectedContent = new();
+    private List<DisplayContent> _displayContents = new();//真ん中画面のソース
 
 
-       
+    private DisplayContent? _selectedContent = new();//右画面のソース
 
-    private async Task HandleSelectedFolder(string folderPath)
+
+
+
+    private async Task HandleSelectedFolder(string folderPath)//ツリーコンポーネントからフォルダを取得
     {
         _selectedFolderPath = folderPath;
         await LoadSelectedFolderContents(_selectedFolderPath);
         await InvokeAsync(StateHasChanged);
     }    
-    private async Task LoadSelectedFolderContents(string folderPath)
+    private async Task LoadSelectedFolderContents(string folderPath)//フォルダからコンテンツを取得
     {
         var displayContents = new List<DisplayContent>();
         if (Directory.Exists(folderPath))
@@ -89,9 +92,20 @@
         }
         _displayContents = displayContents;
     }
-    
-    
-    private void HandleContentSelection(DisplayContent selectedContent)
+
+    private async void HandleSearchCondition(SearchCondition searchCondition)//検索条件からコンテンツ取得
+    {
+        _displayContents = await FileRegistryService.GetDisplayContentAsync(searchCondition);
+
+    }
+
+
+
+
+
+
+
+    private void HandleContentSelection(DisplayContent selectedContent)//中央のコンテンツ選択
     {
         _selectedContent = selectedContent;        
     }

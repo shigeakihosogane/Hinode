@@ -15,6 +15,7 @@
 @foreach (var contents in DisplayContents)
 {
     <p @onclick="() => OnContentClick(contents)">@contents.Name</p>
+    <p @onclick="() => OnContentClick(contents)">@contents.NetworkPath</p>
 }
 
 

@@ -21,12 +21,12 @@ namespace FileBrowser.Services
             var rootDirectorys = new List<RootDirectory>();
             await Task.Run(() =>
             {
-                //rootDirectorys.Add(new RootDirectory
-                //{
-                //    Sort = 1,
-                //    DisplayName = "受信FAX保管",
-                //    DirectoryPath = @"\\192.168.2.240\受注FAX保管"
-                //});
+                rootDirectorys.Add(new RootDirectory
+                {
+                    Sort = 1,
+                    DisplayName = "受信FAX保管",
+                    DirectoryPath = @"\\192.168.2.240\受注FAX保管"
+                });
 
                 rootDirectorys.Add(new RootDirectory
                 {

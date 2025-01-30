@@ -39,6 +39,7 @@ namespace FileBrowser
                 services.AddSingleton<DbConnectionService>();
                 services.AddSingleton<RootDirectoryService>();
                 services.AddSingleton<CustomerService>();
+                services.AddSingleton<FileRegistryService>();
 
 
                 
