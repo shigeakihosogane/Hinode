@@ -1,54 +1,31 @@
-﻿using BlazorFileServer.Models;
+﻿using FileTransfer2ForBlazor.Models;
 using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BlazorFileServer.Services
+namespace FileTransfer2ForBlazor.Services
 {
     public class DocumentIndexService
     {
-        private readonly string _connectionString;
+        private readonly string _connectionString;        
 
-        public DocumentIndexService(IConfiguration configuration)
+        public DocumentIndexService(DBConnection connection, SharedService sharedService)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;                
+            _connectionString = connection.GetConnectionString();            
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public async Task CreateDocumentIndexAsync(DocumentIndex documentIndex)
+        public async Task InsertDocumentIndexAsync(DocumentIndex documentIndex)
         {
-            var sql = @"INSERT INTO T_TF_D_FileTransferHistory (
+            var sql = @"INSERT INTO T_FS_D_DocumentIndex (
 FileName, 
 FilePath, 
 FileSize, 
 CreatedDate, 
 ModifiedDate, 
-FileType,
+FileType, 
 IsDeleted,
 Checksum,
 ThumbnailPath,
@@ -65,7 +42,7 @@ OrderAmount
 @FileSize, 
 @CreatedDate, 
 @ModifiedDate, 
-@FileType,
+@FileType, 
 @IsDeleted,
 @Checksum,
 @ThumbnailPath,
@@ -89,7 +66,7 @@ OrderAmount
                     command.Parameters.Add(new SqlParameter("@CreatedDate", (object?)documentIndex.CreatedDate ?? DBNull.Value));
                     command.Parameters.Add(new SqlParameter("@ModifiedDate", (object?)documentIndex.ModifiedDate ?? DBNull.Value));
                     command.Parameters.Add(new SqlParameter("@FileType", documentIndex.FileType));
-                    command.Parameters.Add(new SqlParameter("@IsDeleted",documentIndex.IsDeleted));
+                    command.Parameters.Add(new SqlParameter("@IsDeleted", documentIndex.IsDeleted));
                     command.Parameters.Add(new SqlParameter("@Checksum", documentIndex.Checksum));
                     command.Parameters.Add(new SqlParameter("@ThumbnailPath", documentIndex.ThumbnailPath));
                     command.Parameters.Add(new SqlParameter("@OrderId", documentIndex.OrderId));
@@ -111,10 +88,11 @@ OrderAmount
                 }
                 catch (SqlException ex)
                 {
-                    Console.WriteLine("CreateDocumentIndexAsync: " + ex.Message);
+                    Console.WriteLine("InsertFileTransferHistoryAsync: " + ex.Message);
                 }
             }
         }
+
 
 
 

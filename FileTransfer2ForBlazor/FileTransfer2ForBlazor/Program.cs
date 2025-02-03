@@ -60,6 +60,7 @@ namespace FileTransfer2ForBlazor
                 services.AddSingleton<ThereforeLogService>();
                 services.AddSingleton<ImportLegacyFilesService>();
                 services.AddSingleton<FileRegistryService>();
+                services.AddSingleton<DocumentIndexService>();
 
                 
                 // Build and return the ServiceProvider

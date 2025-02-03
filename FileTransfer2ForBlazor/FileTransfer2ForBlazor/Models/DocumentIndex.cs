@@ -1,4 +1,10 @@
-﻿namespace BlazorFileServer.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FileTransfer2ForBlazor.Models
 {
     public class DocumentIndex
     {
@@ -21,7 +27,6 @@
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public decimal OrderAmount { get; set; } = 0;
-
 
     }
 }

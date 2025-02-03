@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,5 +23,6 @@ namespace FileTransfer2ForBlazor.Models
         public int 請求締日 { get; set; } = 1;
 
 
+        
     }
 }

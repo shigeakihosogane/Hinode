@@ -14,7 +14,7 @@ using ImageMagick;
 using Microsoft.VisualBasic.Logging;
 using PdfiumViewer;
 using Index = FileTransfer2ForBlazor.Models.Index;
-
+using System.Security.Cryptography;
 
 namespace FileTransfer2ForBlazor.Services
 {
@@ -28,9 +28,11 @@ namespace FileTransfer2ForBlazor.Services
         private readonly FileTransferLogService _fileTransferLogService;
         private readonly ThereforeLogService _thereforeLogService;
         private readonly FileRegistryService _fileRegistryService;
+        private readonly DocumentIndexService _documentIndexService;
 
         public FileTransferService(SettingService settingService, IndexService indexService, NinusiInfoService ninusiInfoService, MotherboardIDService motherboardIDService,
-            FileTransferHistoryService fileTransferHistoryService, FileTransferLogService fileTransferLogService, ThereforeLogService thereforeLogService, FileRegistryService fileRegistryService)
+            FileTransferHistoryService fileTransferHistoryService, FileTransferLogService fileTransferLogService, ThereforeLogService thereforeLogService, 
+            FileRegistryService fileRegistryService, DocumentIndexService documentIndexService)
         {
             _settingService = settingService;
             _serialNumber = motherboardIDService.GetMotherboardSerialNumber();
@@ -40,6 +42,7 @@ namespace FileTransfer2ForBlazor.Services
             _fileTransferLogService = fileTransferLogService;
             _thereforeLogService = thereforeLogService;
             _fileRegistryService = fileRegistryService;
+            _documentIndexService = documentIndexService;
         }
 
 
@@ -368,16 +371,42 @@ namespace FileTransfer2ForBlazor.Services
                 newTfPath = setting.TfUploader + @"\" + newFileName + "(" + i.ToString() + ")" + fileNameElement.拡張子;
                 i++;
             }
-            //
+
+            //DocumentIndex
+            var diDrectory = @"C:\FileStrage\" + fileNameElement.荷主名 + @"\" + fileNameElement.担当部署;
+            if (fileNameElement.担当部署 == "4.倉庫保管")
+            {
+                diDrectory += @"\" + fileNameElement.備考;
+            }
+            if (fileNameElement.開始日.Length == 8)
+            {
+                diDrectory += string.Concat(@"\", fileNameElement.開始日.AsSpan(0, 6));
+            }
+            if (!Directory.Exists(diDrectory))
+            {
+                Directory.CreateDirectory(diDrectory);
+            }
+            var diPath = diDrectory + @"\" + newFileName + fileNameElement.拡張子;
+            i = 1;
+            while (File.Exists(diPath))
+            {
+                diPath = diDrectory + @"\" + newFileName + "(" + i.ToString() + ")" + fileNameElement.拡張子;
+                i++;
+            }
+
 
             try
             {
+                var dt = DateTime.Now;
                 var fileInfo = new FileInfo(fileNameElement.元ファイルFullPath);
+                
+                fileInfo.CopyTo(diPath);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 fileInfo.CopyTo(newTfPath);//===========================================================Therefore用転送
                 //######################################################################################本保存
                 fileInfo.MoveTo(newPath);//#############################################################
                 //######################################################################################
-                var dt = DateTime.Now;
+                
                 fileTransferLog.Result = "正常";
                 fileTransferLog.ProcessedDateTime = dt;
                 //======================================================================================Therefore用転送
@@ -422,6 +451,30 @@ namespace FileTransfer2ForBlazor.Services
                 fileTransferLog.Process = "Registry";//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                 fileTransferLog.FullPathAfterTransfer = newPath;//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                 await _fileTransferLogService.InsertFileTranceferLogAsync(fileTransferLog);//&&&&&&&&&&&
+
+                //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                var info = new FileInfo(diPath);
+                var documentIndex = new DocumentIndex
+                {
+                    FileName = Path.GetFileName(diPath),
+                    FilePath = diPath,
+                    FileSize = info.Length,
+                    CreatedDate = dt,
+                    ModifiedDate = dt,
+                    FileType = Path.GetExtension(diPath),
+                    IsDeleted = false,
+                    Checksum = ComputeFileHash(diPath),
+                    ThumbnailPath = GenerateThumbnail(diPath),
+                    OrderId = Convert.ToDecimal(fileNameElement.受注CD);
+                    ClientName = fileNameElement.荷主名,
+                    Department = fileNameElement.担当部署,
+                    Remarks = fileNameElement.備考,
+                    StartDate = sdt,
+                    EndDate = edt,
+                    OrderAmount = 0,
+                };
+                await _documentIndexService.InsertDocumentIndexAsync(documentIndex);   
+                //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
             }
             catch (Exception e)
@@ -551,6 +604,37 @@ namespace FileTransfer2ForBlazor.Services
                 throw;
             }
         }
+
+
+        static readonly HashAlgorithm hashProvider = new SHA1CryptoServiceProvider();
+        public static string ComputeFileHash(string filePath)
+        {
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var bs = hashProvider.ComputeHash(fs);
+            return BitConverter.ToString(bs).ToLower().Replace("-", "");
+        }
+
+        public string GenerateThumbnail(string pdfPath)
+        {
+            var thumbnailFolder = @"C:\FileStrage\Thumbnail";
+            if (!File.Exists(pdfPath))
+            {
+                throw new FileNotFoundException("PDFファイルが見つかりません", pdfPath);
+            }
+
+            string fileName = Path.GetFileNameWithoutExtension(pdfPath) + ".jpg";
+            string thumbnailPath = Path.Combine(thumbnailFolder, fileName);
+
+            using (var document = PdfDocument.Load(pdfPath))
+            using (var image = document.Render(0, 256, 256, true))
+            {
+                image.Save(thumbnailPath, ImageFormat.Jpeg);
+            }
+            return thumbnailPath;
+        }
+
+
+
 
 
 

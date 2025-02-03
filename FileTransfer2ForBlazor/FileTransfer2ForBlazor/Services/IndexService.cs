@@ -76,7 +76,7 @@ WHERE                       (dbo.T_TF_D_Index.受注ID = @ZID)";
                 {
                     Console.WriteLine("GetIndexAsync: " + ex.Message);
                 }
-            }            
+            }
             return index;
         }
     }

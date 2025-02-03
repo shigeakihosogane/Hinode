@@ -16,9 +16,7 @@ namespace FileTransfer2ForBlazor.Models
         public int TransferQueueTime { get; set; } = 0;        
         public int MonitoringInterval { get; set; } = 0;
         public DateTime ScheduledExecutionTime {  get; set; } = DateTime.MinValue;
-        public int LogRetrievalCount { get; set; } = 0;
+        public int LogRetrievalCount { get; set; } = 0; 
 
     }
-
-
 }
