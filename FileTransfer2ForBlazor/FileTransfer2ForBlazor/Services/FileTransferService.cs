@@ -465,7 +465,7 @@ namespace FileTransfer2ForBlazor.Services
                     IsDeleted = false,
                     Checksum = ComputeFileHash(diPath),
                     ThumbnailPath = GenerateThumbnail(diPath),
-                    OrderId = Convert.ToDecimal(fileNameElement.受注CD);
+                    OrderId = Convert.ToDecimal(fileNameElement.受注CD),
                     ClientName = fileNameElement.荷主名,
                     Department = fileNameElement.担当部署,
                     Remarks = fileNameElement.備考,
